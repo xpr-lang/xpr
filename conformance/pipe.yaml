@@ -1,0 +1,54 @@
+suite: pipe
+version: "0.1.0"
+tests:
+  - name: basic pipe into function
+    expression: '"hello" |> upper'
+    expected: "HELLO"
+    tags: ["level-3", "advanced"]
+
+  - name: chained pipe trim then upper
+    expression: '"  hello  " |> trim |> upper'
+    expected: "HELLO"
+    tags: ["level-3", "advanced"]
+
+  - name: pipe with arithmetic left side
+    expression: "1 + 2 |> string"
+    expected: "3"
+    tags: ["level-3", "advanced"]
+
+  - name: pipe into sort with comparator
+    expression: "[3,1,2] |> sort((a,b) => a - b)"
+    expected: [1, 2, 3]
+    tags: ["level-3", "advanced"]
+
+  - name: pipe non-callable error
+    expression: "5 |> 3"
+    error: "callable"
+    tags: ["level-3", "advanced"]
+
+  - name: pipe with context and filter
+    expression: "items |> filter(x => x > 5)"
+    context:
+      items: [1, 5, 10, 15]
+    expected: [10, 15]
+    tags: ["level-3", "advanced"]
+
+  - name: nested pipe chain sort then reverse
+    expression: "[3,1,2] |> sort((a,b) => a - b) |> reverse()"
+    expected: [3, 2, 1]
+    tags: ["level-3", "advanced"]
+
+  - name: pipe with string type function
+    expression: "42 |> string"
+    expected: "42"
+    tags: ["level-3", "advanced"]
+
+  - name: pipe with round function
+    expression: "3.7 |> round"
+    expected: 4
+    tags: ["level-3", "advanced"]
+
+  - name: pipe with abs function
+    expression: "-5 |> abs"
+    expected: 5
+    tags: ["level-3", "advanced"]

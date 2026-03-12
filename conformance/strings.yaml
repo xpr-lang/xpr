@@ -1,0 +1,79 @@
+suite: strings
+version: "0.1.0"
+tests:
+  - name: string len method
+    expression: '"hello".len()'
+    expected: 5
+    tags: ["level-1", "core"]
+
+  - name: string upper method
+    expression: '"hello".upper()'
+    expected: "HELLO"
+    tags: ["level-1", "core"]
+
+  - name: string lower method
+    expression: '"HELLO".lower()'
+    expected: "hello"
+    tags: ["level-1", "core"]
+
+  - name: string trim method
+    expression: '"  hello  ".trim()'
+    expected: "hello"
+    tags: ["level-1", "core"]
+
+  - name: string startsWith true
+    expression: '"hello world".startsWith("hello")'
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: string endsWith true
+    expression: '"hello world".endsWith("world")'
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: string contains true
+    expression: '"hello world".contains("lo wo")'
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: string split by comma
+    expression: '"a,b,c".split(",")'
+    expected: ["a", "b", "c"]
+    tags: ["level-1", "core"]
+
+  - name: string replace all occurrences
+    expression: '"hello".replace("l", "r")'
+    expected: "herro"
+    tags: ["level-1", "core"]
+
+  - name: string slice with start and end
+    expression: '"hello".slice(1, 3)'
+    expected: "el"
+    tags: ["level-1", "core"]
+
+  - name: string slice to end
+    expression: '"hello".slice(1)'
+    expected: "ello"
+    tags: ["level-1", "core"]
+
+  - name: template literal with expression
+    expression: "`${1 + 2}`"
+    expected: "3"
+    tags: ["level-3", "advanced"]
+
+  - name: template literal with context variable
+    expression: "`Hello ${name}`"
+    context:
+      name: "Alice"
+    expected: "Hello Alice"
+    tags: ["level-3", "advanced"]
+
+  - name: string method on null error
+    expression: "null.upper()"
+    error: "null"
+    tags: ["level-1", "core"]
+
+  - name: string method on non-string error
+    expression: "42.upper()"
+    error: "upper"
+    tags: ["level-1", "core"]

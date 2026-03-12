@@ -1,0 +1,80 @@
+suite: collections
+version: "0.1.0"
+tests:
+  - name: array map doubles
+    expression: "[1,2,3].map(x => x * 2)"
+    expected: [2, 4, 6]
+    tags: ["level-2", "collections"]
+
+  - name: array filter greater than
+    expression: "[1,2,3,4].filter(x => x > 2)"
+    expected: [3, 4]
+    tags: ["level-2", "collections"]
+
+  - name: array reduce sum
+    expression: "[1,2,3].reduce((sum, x) => sum + x, 0)"
+    expected: 6
+    tags: ["level-2", "collections"]
+
+  - name: array find by property
+    expression: '[{"id": 1}, {"id": 2}, {"id": 3}].find(x => x.id == 2)'
+    expected:
+      id: 2
+    tags: ["level-2", "collections"]
+
+  - name: array some true
+    expression: "[1,2,3].some(x => x > 2)"
+    expected: true
+    tags: ["level-2", "collections"]
+
+  - name: array every true
+    expression: "[1,2,3].every(x => x > 0)"
+    expected: true
+    tags: ["level-2", "collections"]
+
+  - name: array every false
+    expression: "[1,2,3].every(x => x > 1)"
+    expected: false
+    tags: ["level-2", "collections"]
+
+  - name: array flatMap flattens
+    expression: "[[1,2],[3,4]].flatMap(x => x)"
+    expected: [1, 2, 3, 4]
+    tags: ["level-2", "collections"]
+
+  - name: array sort ascending
+    expression: "[3,1,2].sort((a, b) => a - b)"
+    expected: [1, 2, 3]
+    tags: ["level-2", "collections"]
+
+  - name: array reverse
+    expression: "[1,2,3].reverse()"
+    expected: [3, 2, 1]
+    tags: ["level-2", "collections"]
+
+  - name: array length property
+    expression: "[1,2,3].length"
+    expected: 3
+    tags: ["level-2", "collections"]
+
+  - name: array filter then map chained
+    expression: "items.filter(x => x > 2).map(x => x * 10)"
+    context:
+      items: [1, 2, 3, 4]
+    expected: [30, 40]
+    tags: ["level-2", "collections"]
+
+  - name: empty array map returns empty
+    expression: "[].map(x => x * 2)"
+    expected: []
+    tags: ["level-2", "collections"]
+
+  - name: empty array find returns null
+    expression: "[].find(x => true)"
+    expected: null
+    tags: ["level-2", "collections"]
+
+  - name: map on non-array error
+    expression: "42.map(x => x)"
+    error: "map"
+    tags: ["level-2", "collections"]
