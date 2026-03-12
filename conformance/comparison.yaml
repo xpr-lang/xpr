@@ -1,0 +1,82 @@
+suite: comparison
+version: "0.1.0"
+tests:
+  - name: equality integers true
+    expression: "1 == 1"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: equality integers false
+    expression: "1 == 2"
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: equality strings true
+    expression: '"a" == "a"'
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: inequality integers true
+    expression: "1 != 2"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: inequality strings false
+    expression: '"a" != "a"'
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: less than true
+    expression: "1 < 2"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: greater than true
+    expression: "3 > 2"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: less than or equal true
+    expression: "2 <= 2"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: greater than or equal false
+    expression: "3 >= 4"
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: string comparison lexicographic true
+    expression: '"abc" < "abd"'
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: null equals null
+    expression: "null == null"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: null not equal to zero
+    expression: "null == 0"
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: null not equal to empty string
+    expression: 'null == ""'
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: null not equal to false
+    expression: "null == false"
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: cross-type integer string strict equality
+    expression: '1 == "1"'
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: cross-type boolean integer strict equality
+    expression: "true == 1"
+    expected: false
+    tags: ["level-1", "core"]
