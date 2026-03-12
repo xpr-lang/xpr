@@ -1,0 +1,85 @@
+suite: functions
+version: "0.1.0"
+tests:
+  - name: round positive float
+    expression: "round(3.7)"
+    expected: 4
+    tags: ["level-1", "core"]
+
+  - name: abs negative number
+    expression: "abs(-5)"
+    expected: 5
+    tags: ["level-1", "core"]
+
+  - name: type of number
+    expression: "type(42)"
+    expected: "number"
+    tags: ["level-1", "core"]
+
+  - name: type of string
+    expression: 'type("hello")'
+    expected: "string"
+    tags: ["level-1", "core"]
+
+  - name: type of null
+    expression: "type(null)"
+    expected: "null"
+    tags: ["level-1", "core"]
+
+  - name: int conversion from string
+    expression: 'int("42")'
+    expected: 42
+    tags: ["level-1", "core"]
+
+  - name: float conversion from string
+    expression: 'float("3.14")'
+    expected: 3.14
+    tags: ["level-1", "core"]
+
+  - name: string conversion from number
+    expression: "string(42)"
+    expected: "42"
+    tags: ["level-1", "core"]
+
+  - name: bool conversion truthy
+    expression: "bool(1)"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: bool conversion falsy
+    expression: "bool(0)"
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: round wrong arity zero args
+    expression: "round()"
+    error: "Wrong number of arguments"
+    tags: ["level-1", "core"]
+
+  - name: abs wrong arity two args
+    expression: "abs(1, 2)"
+    error: "Wrong number of arguments"
+    tags: ["level-1", "core"]
+
+  - name: unknown function call
+    expression: "foo(1)"
+    error: "Unknown function"
+    tags: ["level-1", "core"]
+
+  - name: arrow function map basic
+    expression: "[1, 2, 3].map(x => x * 2)"
+    expected: [2, 4, 6]
+    tags: ["level-1", "core"]
+
+  - name: arrow function sort with comparator
+    expression: "[3, 1, 2].sort((a, b) => a - b)"
+    expected: [1, 2, 3]
+    tags: ["level-1", "core"]
+
+  - name: arrow function filter with context
+    expression: "items.filter(x => x > threshold)"
+    context:
+      items: [1, 5, 10]
+      threshold: 4
+    expected: [5, 10]
+    tags: ["level-1", "core"]

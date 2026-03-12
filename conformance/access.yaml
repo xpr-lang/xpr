@@ -1,0 +1,118 @@
+suite: access
+version: "0.1.0"
+tests:
+  - name: dot access simple property
+    expression: "user.name"
+    context:
+      user:
+        name: "Alice"
+    expected: "Alice"
+    tags: ["level-1", "core"]
+
+  - name: nested dot access
+    expression: "user.address.city"
+    context:
+      user:
+        address:
+          city: "NYC"
+    expected: "NYC"
+    tags: ["level-1", "core"]
+
+  - name: bracket access with string key
+    expression: 'user["name"]'
+    context:
+      user:
+        name: "Alice"
+    expected: "Alice"
+    tags: ["level-1", "core"]
+
+  - name: bracket access with numeric index
+    expression: "items[0]"
+    context:
+      items: [10, 20, 30]
+    expected: 10
+    tags: ["level-1", "core"]
+
+  - name: bracket access second element
+    expression: "items[1]"
+    context:
+      items: [10, 20, 30]
+    expected: 20
+    tags: ["level-1", "core"]
+
+  - name: missing property returns null
+    expression: "user.email"
+    context:
+      user:
+        name: "Alice"
+    expected: null
+    tags: ["level-1", "core"]
+
+  - name: deep missing property access on null is error
+    expression: "user.foo.bar"
+    context:
+      user:
+        name: "Alice"
+    error: "null"
+    tags: ["level-1", "core"]
+
+  - name: array out of bounds returns null
+    expression: "items[99]"
+    context:
+      items: [1, 2, 3]
+    expected: null
+    tags: ["level-1", "core"]
+
+  - name: negative indexing is error
+    expression: "items[-1]"
+    context:
+      items: [1, 2, 3]
+    error: "negative"
+    tags: ["level-1", "core"]
+
+  - name: optional chaining on existing property
+    expression: "user?.name"
+    context:
+      user:
+        name: "Alice"
+    expected: "Alice"
+    tags: ["level-3", "advanced"]
+
+  - name: optional chaining on null value
+    expression: "missing?.deep"
+    context:
+      missing: null
+    expected: null
+    tags: ["level-3", "advanced"]
+
+  - name: optional chaining chain with missing intermediate
+    expression: "user?.address?.city"
+    context:
+      user:
+        name: "Alice"
+    expected: null
+    tags: ["level-3", "advanced"]
+
+  - name: object keys method
+    expression: '{"a": 1, "b": 2}.keys()'
+    expected: ["a", "b"]
+    tags: ["level-1", "core"]
+
+  - name: object values method
+    expression: '{"a": 1, "b": 2}.values()'
+    expected: [1, 2]
+    tags: ["level-1", "core"]
+
+  - name: prototype blocking
+    expression: "obj.__proto__"
+    context:
+      obj: {}
+    error: "restricted"
+    tags: ["level-1", "core"]
+
+  - name: constructor blocking
+    expression: "obj.constructor"
+    context:
+      obj: {}
+    error: "restricted"
+    tags: ["level-1", "core"]
