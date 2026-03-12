@@ -1,0 +1,137 @@
+suite: literals
+version: "0.1.0"
+tests:
+  - name: integer literal positive
+    expression: "42"
+    expected: 42
+    tags: ["level-1", "core"]
+
+  - name: integer literal zero
+    expression: "0"
+    expected: 0
+    tags: ["level-1", "core"]
+
+  - name: integer literal negative
+    expression: "-1"
+    expected: -1
+    tags: ["level-1", "core"]
+
+  - name: float literal
+    expression: "3.14"
+    expected: 3.14
+    tags: ["level-1", "core"]
+
+  - name: float literal less than one
+    expression: "0.5"
+    expected: 0.5
+    tags: ["level-1", "core"]
+
+  - name: float literal negative
+    expression: "-2.7"
+    expected: -2.7
+    tags: ["level-1", "core"]
+
+  - name: scientific notation integer exponent
+    expression: "1e10"
+    expected: 10000000000
+    tags: ["level-1", "core"]
+
+  - name: scientific notation negative exponent
+    expression: "2.5e-3"
+    expected: 0.0025
+    tags: ["level-1", "core"]
+
+  - name: string literal double quotes
+    expression: '"hello"'
+    expected: "hello"
+    tags: ["level-1", "core"]
+
+  - name: string literal single quotes
+    expression: "'world'"
+    expected: "world"
+    tags: ["level-1", "core"]
+
+  - name: string literal empty double quotes
+    expression: '""'
+    expected: ""
+    tags: ["level-1", "core"]
+
+  - name: string escape newline
+    expression: '"line\nnew"'
+    expected: "line\nnew"
+    tags: ["level-1", "core"]
+
+  - name: string escape tab
+    expression: '"tab\there"'
+    expected: "tab\there"
+    tags: ["level-1", "core"]
+
+  - name: string escape double quote inside
+    expression: '"quote\"inside"'
+    expected: 'quote"inside'
+    tags: ["level-1", "core"]
+
+  - name: boolean literal true
+    expression: "true"
+    expected: true
+    tags: ["level-1", "core"]
+
+  - name: boolean literal false
+    expression: "false"
+    expected: false
+    tags: ["level-1", "core"]
+
+  - name: null literal
+    expression: "null"
+    expected: null
+    tags: ["level-1", "core"]
+
+  - name: array literal with values
+    expression: "[1, 2, 3]"
+    expected: [1, 2, 3]
+    tags: ["level-1", "core"]
+
+  - name: array literal empty
+    expression: "[]"
+    expected: []
+    tags: ["level-1", "core"]
+
+  - name: array literal mixed types
+    expression: '[1, "mixed", true, null]'
+    expected: [1, "mixed", true, null]
+    tags: ["level-1", "core"]
+
+  - name: object literal with properties
+    expression: '{"a": 1, "b": 2}'
+    expected: {"a": 1, "b": 2}
+    tags: ["level-1", "core"]
+
+  - name: object literal empty
+    expression: "{}"
+    expected: {}
+    tags: ["level-1", "core"]
+
+  - name: object literal nested
+    expression: '{"nested": {"deep": true}}'
+    expected: {"nested": {"deep": true}}
+    tags: ["level-1", "core"]
+
+  - name: template literal plain string
+    expression: "`plain string`"
+    expected: "plain string"
+    tags: ["level-1", "core"]
+
+  - name: template literal with variable interpolation
+    expression: "`Hello ${name}`"
+    context:
+      name: "Alice"
+    expected: "Hello Alice"
+    tags: ["level-1", "core"]
+
+  - name: template literal with expression interpolation
+    expression: "`Total: ${price * qty}`"
+    context:
+      price: 10
+      qty: 3
+    expected: "Total: 30"
+    tags: ["level-1", "core"]

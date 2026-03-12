@@ -1,0 +1,102 @@
+suite: arithmetic
+version: "0.1.0"
+tests:
+  - name: addition basic
+    expression: "1 + 2"
+    expected: 3
+    tags: ["level-1", "core"]
+
+  - name: subtraction basic
+    expression: "10 - 3"
+    expected: 7
+    tags: ["level-1", "core"]
+
+  - name: multiplication basic
+    expression: "4 * 5"
+    expected: 20
+    tags: ["level-1", "core"]
+
+  - name: division basic
+    expression: "10 / 3"
+    expected: 3.3333333333333335
+    tags: ["level-1", "core"]
+
+  - name: modulo basic
+    expression: "10 % 3"
+    expected: 1
+    tags: ["level-1", "core"]
+
+  - name: exponentiation basic
+    expression: "2 ** 10"
+    expected: 1024
+    tags: ["level-1", "core"]
+
+  - name: exponentiation zero power
+    expression: "2 ** 0"
+    expected: 1
+    tags: ["level-1", "core"]
+
+  - name: precedence multiply before add
+    expression: "2 + 3 * 4"
+    expected: 14
+    tags: ["level-1", "core"]
+
+  - name: precedence parens override
+    expression: "(2 + 3) * 4"
+    expected: 20
+    tags: ["level-1", "core"]
+
+  - name: associativity exponentiation right
+    expression: "2 ** 3 ** 2"
+    expected: 512
+    tags: ["level-1", "core"]
+
+  - name: associativity subtraction left
+    expression: "10 - 3 - 2"
+    expected: 5
+    tags: ["level-1", "core"]
+
+  - name: unary negation
+    expression: "-5"
+    expected: -5
+    tags: ["level-1", "core"]
+
+  - name: unary double negation
+    expression: "--5"
+    expected: 5
+    tags: ["level-1", "core"]
+
+  - name: float precision ieee754
+    expression: "0.1 + 0.2"
+    expected: 0.30000000000000004
+    tags: ["level-1", "core"]
+
+  - name: division by zero error
+    expression: "1 / 0"
+    error: "Division by zero"
+    tags: ["level-1", "core"]
+
+  - name: type error string plus number
+    expression: '"hello" + 1'
+    error: "Type error"
+    tags: ["level-1", "core"]
+
+  - name: type error boolean multiply number
+    expression: "true * 2"
+    error: "Type error"
+    tags: ["level-1", "core"]
+
+  - name: string concatenation valid
+    expression: '"hello" + " " + "world"'
+    expected: "hello world"
+    tags: ["level-1", "core"]
+
+  - name: type error null plus number
+    expression: "null + 1"
+    error: "Type error"
+    tags: ["level-1", "core"]
+
+  - name: chained arithmetic
+    expression: "2 + 3 + 4 + 5"
+    expected: 14
+    tags: ["level-1", "core"]
