@@ -1,0 +1,16 @@
+name: Validate Conformance Tests
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yaml validator
+        run: npm install -g js-yaml
+      - name: Validate all YAML files
+        run: |
+          for f in conformance/*.yaml; do
+            echo "Validating $f..."
+            js-yaml "$f" > /dev/null && echo "  ✓ Valid" || (echo "  ✗ Invalid" && exit 1)
+          done
+          echo "All YAML files valid."
