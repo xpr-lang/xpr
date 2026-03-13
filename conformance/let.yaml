@@ -88,5 +88,5 @@ tests:
 
   - name: let error missing equals sign
     expression: "let x; x"
-    error: ""
+    error: "expected"
     tags: ["level-1", "let", "error"]
