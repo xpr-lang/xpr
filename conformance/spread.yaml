@@ -1,0 +1,148 @@
+suite: spread
+version: "0.2.0"
+tests:
+  # ── Array spread ──────────────────────────────────────────────────────────
+
+  - name: array spread basic
+    expression: "[...[1, 2, 3]]"
+    expected: [1, 2, 3]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread append elements
+    expression: "[...[1, 2], 3, 4]"
+    expected: [1, 2, 3, 4]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread prepend elements
+    expression: "[0, ...[1, 2]]"
+    expected: [0, 1, 2]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread multiple spreads
+    expression: "[...[1, 2], ...[3, 4]]"
+    expected: [1, 2, 3, 4]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread with context variable
+    expression: '[...items, "extra"]'
+    context:
+      items: ["a", "b"]
+    expected: ["a", "b", "extra"]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread empty array
+    expression: "[...[]]"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  - name: array spread does not flatten nested arrays
+    expression: "[...[1, [2, 3]], 4]"
+    expected: [1, [2, 3], 4]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread context variable between literals
+    expression: "[0, ...nums, 99]"
+    context:
+      nums: [10, 20, 30]
+    expected: [0, 10, 20, 30, 99]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread multiple context variables
+    expression: "[...first, ...second]"
+    context:
+      first: [1, 2]
+      second: [3, 4]
+    expected: [1, 2, 3, 4]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread single element array
+    expression: "[...[42]]"
+    expected: [42]
+    tags: ["level-3", "advanced"]
+
+  - name: array spread error non-array number
+    expression: "[...42]"
+    error: "Cannot spread"
+    tags: ["level-3", "advanced"]
+
+  - name: array spread error null
+    expression: "[...null]"
+    error: "Cannot spread"
+    tags: ["level-3", "advanced"]
+
+  - name: array spread error string
+    expression: '[..."hello"]'
+    error: "Cannot spread"
+    tags: ["level-3", "advanced"]
+
+  # ── Object spread ─────────────────────────────────────────────────────────
+
+  - name: object spread basic
+    expression: '{...{"a": 1, "b": 2}}'
+    expected: {"a": 1, "b": 2}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread override key
+    expression: '{...{"a": 1}, "a": 2}'
+    expected: {"a": 2}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread multiple spreads
+    expression: '{...{"a": 1}, ...{"b": 2}}'
+    expected: {"a": 1, "b": 2}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread override order last wins
+    expression: '{...{"a": 1, "b": 2}, ...{"b": 3, "c": 4}}'
+    expected: {"a": 1, "b": 3, "c": 4}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread with context variable
+    expression: '{...user, "role": "admin"}'
+    context:
+      user:
+        name: "Alice"
+    expected: {"name": "Alice", "role": "admin"}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread empty object
+    expression: "{...{}}"
+    expected: {}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread with surrounding keys
+    expression: '{"x": 0, ...{"a": 1}, "y": 2}'
+    expected: {"x": 0, "a": 1, "y": 2}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread context variable merged with literal
+    expression: '{...defaults, ...overrides}'
+    context:
+      defaults:
+        color: "blue"
+        size: "medium"
+      overrides:
+        size: "large"
+        weight: "bold"
+    expected: {"color": "blue", "size": "large", "weight": "bold"}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread single key object
+    expression: '{...{"only": true}}'
+    expected: {"only": true}
+    tags: ["level-3", "advanced"]
+
+  - name: object spread error non-object number
+    expression: "{...42}"
+    error: "Cannot spread"
+    tags: ["level-3", "advanced"]
+
+  - name: object spread error null
+    expression: "{...null}"
+    error: "Cannot spread"
+    tags: ["level-3", "advanced"]
+
+  - name: object spread error array
+    expression: "{...[1, 2]}"
+    error: "Cannot spread"
+    tags: ["level-3", "advanced"]
