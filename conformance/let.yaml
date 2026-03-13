@@ -1,0 +1,92 @@
+suite: let
+version: "0.2.0"
+tests:
+  - name: let basic binding
+    expression: "let x = 1; x"
+    expected: 1
+    tags: ["level-1", "let"]
+
+  - name: let chained bindings
+    expression: "let x = 1; let y = x + 1; y"
+    expected: 2
+    tags: ["level-1", "let"]
+
+  - name: let expression value
+    expression: "let x = 2 * 3; x + 1"
+    expected: 7
+    tags: ["level-1", "let"]
+
+  - name: let with string
+    expression: 'let name = "world"; `hello ${name}`'
+    expected: "hello world"
+    tags: ["level-1", "let"]
+
+  - name: let shadowing
+    expression: "let x = 1; let x = 2; x"
+    expected: 2
+    tags: ["level-1", "let"]
+
+  - name: let arrow function binding
+    expression: "let f = (x) => x * 2; f(5)"
+    expected: 10
+    tags: ["level-2", "let"]
+
+  - name: let arrow function with closure
+    expression: "let a = 10; let f = (x) => x + a; f(5)"
+    expected: 15
+    tags: ["level-2", "let"]
+
+  - name: let with pipe and map
+    expression: "let data = [1,2,3]; data |> map(x => x * 2)"
+    expected: [2, 4, 6]
+    tags: ["level-3", "let"]
+
+  - name: let with ternary
+    expression: 'let x = 5; x > 3 ? "big" : "small"'
+    expected: "big"
+    tags: ["level-1", "let"]
+
+  - name: let with optional chaining and nullish coalescing
+    expression: 'let obj = null; obj?.name ?? "none"'
+    expected: "none"
+    tags: ["level-3", "let"]
+
+  - name: let with array filter and map chained
+    expression: "let items = [1,2,3,4,5]; items.filter(x => x > 2).map(x => x * 10)"
+    expected: [30, 40, 50]
+    tags: ["level-2", "let"]
+
+  - name: let complex chain with reduce and average
+    expression: "let sum = [1,2,3].reduce((a,b) => a + b, 0); let avg = sum / 3; avg"
+    expected: 2
+    tags: ["level-2", "let"]
+
+  - name: let nested scope
+    expression: "let x = 1; let y = (let a = x + 1; a * 2); y"
+    expected: 4
+    tags: ["level-2", "let"]
+
+  - name: let binding with boolean expression
+    expression: "let a = 5; let b = 10; a < b"
+    expected: true
+    tags: ["level-1", "let"]
+
+  - name: let binding with object property access
+    expression: 'let obj = {"key": "value"}; obj.key'
+    expected: "value"
+    tags: ["level-1", "let"]
+
+  - name: let binding with array index access
+    expression: "let arr = [10, 20, 30]; arr[1]"
+    expected: 20
+    tags: ["level-1", "let"]
+
+  - name: let error missing body after semicolon
+    expression: "let x = 1;"
+    error: "Expected expression"
+    tags: ["level-1", "let", "error"]
+
+  - name: let error missing equals sign
+    expression: "let x; x"
+    error: ""
+    tags: ["level-1", "let", "error"]
