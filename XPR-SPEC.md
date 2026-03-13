@@ -2,7 +2,7 @@
 
 A sandboxed expression language with JS/Python-familiar syntax, designed for data pipeline transforms, with native interpreters in JavaScript, Python, and Go.
 
-**Version**: 0.1.0  
+**Version**: 0.2.0  
 **Status**: Draft
 
 ---
@@ -28,8 +28,169 @@ Nobody owns **"modern-feeling expression language for data pipelines, cross-runt
 - Not a general-purpose language. No `while`, no `class`, no I/O, no imports.
 - Not a transpiler. Doesn't compile to JS/Python/Go — it **evaluates** identically across all three.
 - No side effects. Pure expressions only.
-- No variable assignment (`let`, `const`, `var`).
+- No variable assignment (`const`, `var`). Immutable `let` bindings ARE supported (see [v0.2 Features](#v02-features)).
 - No loops (`for`, `while`). Collection operations are the only iteration.
+
+---
+
+## v0.2 Features
+
+### `let` Bindings
+
+`let` creates **immutable, scoped bindings**. It is NOT variable assignment — bindings cannot be re-assigned.
+
+**Syntax**: `let <name> = <value>; <body>`
+
+The semicolon separates the binding from the body expression. The body is the return value.
+
+```javascript
+let x = 1; x + 1              // 2
+let x = 1; let y = x + 1; y  // 2 — chained bindings
+let x = 1; let x = 2; x      // 2 — shadowing allowed
+let f = (x) => x * 2; f(5)   // 10 — arrow function as value
+```
+
+**Scoping rules**:
+- Each `let` binding is visible in the body expression that follows it
+- Shadowing is allowed: a new `let x` in the body shadows the outer `x`
+- Arrow functions capture bindings from their enclosing scope (closures)
+
+**`let` is allowed everywhere an expression is valid**:
+```javascript
+// Top-level
+let data = [1,2,3]; data |> map(x => x * 2)
+
+// In ternary
+x > 0 ? let a = x * 2; a : 0
+
+// In array element
+[let x = 1; x * 2, let y = 3; y]  // [2, 3]
+```
+
+**Error cases**:
+- `let x = 1;` — trailing semicolon with no body → error: "Expected expression after ';'"
+- `let = 1; 2` — missing identifier → parse error
+- `let 123 = 1; 2` — non-identifier name → parse error
+
+**Breaking change**: `let` is now a reserved keyword. Expressions using `let` as a variable name (e.g., context `{let: 5}` with expression `let + 1`) will fail to parse.
+
+---
+
+### Spread Operator
+
+The spread operator (`...`) expands arrays or objects in-place.
+
+**Array spread**:
+```javascript
+[...[1,2], 3, 4]              // [1,2,3,4]
+[...[1,2], ...[3,4]]          // [1,2,3,4]
+[0, ...items, 99]             // prepend/append with context variable
+[...[]]                       // [] — spread empty array
+```
+
+**Object spread**:
+```javascript
+{...{"a":1}, "b":2}           // {"a":1,"b":2}
+{...{"a":1}, ...{"b":2}}      // {"a":1,"b":2}
+{...defaults, ...overrides}   // later keys override earlier keys
+{...{}}                       // {} — spread empty object
+```
+
+**Error cases**:
+- `[...null]` → error: "Cannot spread null"
+- `[..."hello"]` → error: "Cannot spread string into array"
+- `[...42]` → error: "Cannot spread non-array into array"
+- `{...null}` → error: "Cannot spread null"
+- `{...[1,2]}` → error: "Cannot spread array into object"
+- `{...42}` → error: "Cannot spread non-object"
+
+**NOT supported in v0.2**: Spread in function call arguments (`fn(...args)`) — deferred to v0.3.
+
+---
+
+### New Array Methods (v0.2)
+
+| Method | Signature | Returns | Notes |
+|--------|-----------|---------|-------|
+| `includes` | `(val) → boolean` | `boolean` | Strict equality |
+| `indexOf` | `(val) → number` | `number` | Returns `-1` if not found |
+| `slice` | `(start[, end]) → array` | `array` | Same semantics as string `slice` |
+| `join` | `(sep: string) → string` | `string` | Separator must be string |
+| `concat` | `(other: array) → array` | `array` | Returns new array |
+| `flat` | `() → array` | `array` | Flattens ONE level only |
+| `unique` | `() → array` | `array` | Preserves first occurrence; identity comparison for objects |
+| `zip` | `(other: array) → array` | `array of pairs` | Truncates to shortest length |
+| `chunk` | `(size: number) → array` | `array of arrays` | Last chunk may be smaller; size must be > 0 |
+| `groupBy` | `(fn: arrow) → object` | `object` | Keys are strings; **alphabetical key order** |
+
+```javascript
+[1,2,3].includes(2)                          // true
+[1,2,3].indexOf(5)                           // -1
+[1,2,3,4].slice(1,3)                         // [2,3]
+[1,2,3].join(", ")                           // "1, 2, 3"
+[1,2].concat([3,4])                          // [1,2,3,4]
+[[1,2],[3,4]].flat()                         // [1,2,3,4]
+[1,2,1,3].unique()                           // [1,2,3]
+[1,2,3].zip([4,5,6])                         // [[1,4],[2,5],[3,6]]
+[1,2,3,4].chunk(2)                           // [[1,2],[3,4]]
+[1,2,3,4].groupBy(x => x % 2 == 0 ? "even" : "odd")  // {"even":[2,4],"odd":[1,3]}
+```
+
+---
+
+### New String Methods (v0.2)
+
+| Method | Signature | Returns | Notes |
+|--------|-----------|---------|-------|
+| `indexOf` | `(sub: string) → number` | `number` | Returns `-1` if not found |
+| `repeat` | `(n: number) → string` | `string` | `n` must be non-negative integer |
+| `trimStart` | `() → string` | `string` | Removes leading whitespace |
+| `trimEnd` | `() → string` | `string` | Removes trailing whitespace |
+| `charAt` | `(n: number) → string` | `string` | Out of bounds → `""` (empty string) |
+| `padStart` | `(n[, ch]) → string` | `string` | `ch` defaults to `" "` |
+| `padEnd` | `(n[, ch]) → string` | `string` | `ch` defaults to `" "` |
+
+```javascript
+"hello".indexOf("ll")    // 2
+"hello".indexOf("xyz")   // -1
+"ab".repeat(3)           // "ababab"
+"  hello".trimStart()    // "hello"
+"hello  ".trimEnd()      // "hello"
+"hello".charAt(1)        // "e"
+"hello".charAt(99)       // ""
+"5".padStart(3, "0")     // "005"
+"5".padEnd(3, ".")       // "5.."
+```
+
+---
+
+### New Object Methods (v0.2)
+
+| Method | Signature | Returns | Notes |
+|--------|-----------|---------|-------|
+| `entries` | `() → array` | `array of [key, value] pairs` | **Alphabetical key order** (required for cross-runtime conformance) |
+| `has` | `(key: string) → boolean` | `boolean` | Checks if key exists at top level |
+
+```javascript
+{"c":3,"a":1,"b":2}.entries()  // [["a",1],["b",2],["c",3]]
+{"a":1}.has("a")               // true
+{"a":1}.has("b")               // false
+```
+
+---
+
+### New Global Function: `range` (v0.2)
+
+```javascript
+range(end)              // range(5)       → [0,1,2,3,4]
+range(start, end)       // range(2,5)     → [2,3,4]
+range(start, end, step) // range(0,10,2)  → [0,2,4,6,8]
+                        // range(5,0,-1)  → [5,4,3,2,1]
+```
+
+- `step` must be an integer — float step → error
+- Negative step counts down: `range(5,0,-1)` → `[5,4,3,2,1]`
+- Empty range if start ≥ end with positive step: `range(5,0)` → `[]`
 
 ---
 
@@ -368,7 +529,7 @@ x => x * 2
 ### Rules
 
 - Body is a **single expression** — no multi-line bodies, no statements
-- Arrow functions are **not first-class values** in v0.1 — they only appear as arguments to collection methods and pipe targets
+- Arrow functions are **first-class values** — they can be passed as arguments to collection methods, used as pipe targets, and assigned to `let` bindings (e.g., `let f = (x) => x + 1; f(5)` → `6`)
 - Arrow binds tighter than pipe: `items |> filter(x => x > 5)` — the `=>` captures `x > 5`, not the whole pipe
 - Parameters are scoped to the arrow function body — they shadow outer context variables
 
@@ -493,7 +654,7 @@ XprError {
 
 ## EBNF Grammar
 
-Formal grammar for XPR v0.1. Uses standard EBNF notation:
+Formal grammar for XPR v0.2. Uses standard EBNF notation:
 - `*` = zero or more
 - `+` = one or more
 - `?` = optional
@@ -502,8 +663,12 @@ Formal grammar for XPR v0.1. Uses standard EBNF notation:
 - `[ ]` = character class
 
 ```ebnf
-(* Top-level *)
-Expression     ::= PipeExpr
+(* Top-level — may be a let binding or any expression *)
+Expression     ::= LetExpression
+               | PipeExpr
+
+(* Let bindings — immutable, scoped *)
+LetExpression  ::= "let" Identifier "=" Expression ";" Expression
 
 (* Pipe — lowest precedence, left-associative *)
 PipeExpr       ::= TernaryExpr ( "|>" TernaryExpr )*
@@ -565,10 +730,16 @@ ParamList      ::= Identifier ( "," Identifier )*
 
 ArgList        ::= Expression ( "," Expression )*
 
-(* Literals *)
-ArrayLiteral   ::= "[" ( Expression ( "," Expression )* )? "]"
+(* Literals — arrays and objects support spread elements *)
+ArrayLiteral   ::= "[" ( ArrayElement ( "," ArrayElement )* )? "]"
 
-ObjectLiteral  ::= "{" ( Property ( "," Property )* )? "}"
+ArrayElement   ::= "..." Expression                (* spread *)
+               | Expression                        (* regular element *)
+
+ObjectLiteral  ::= "{" ( ObjectEntry ( "," ObjectEntry )* )? "}"
+
+ObjectEntry    ::= "..." Expression                (* spread *)
+               | Property                          (* regular property *)
 
 Property       ::= ( Identifier | StringLiteral ) ":" Expression
 
@@ -695,7 +866,7 @@ Custom functions are called like built-in functions. They receive evaluated argu
 
 ## AST Node Types
 
-17 node types. ESTree-influenced, simplified for expression-only context.
+19 node types. ESTree-influenced, simplified for expression-only context.
 
 Every node carries a `position` field (character offset) for error reporting.
 
@@ -736,10 +907,12 @@ TemplateLiteral       { quasis: string[], expressions: Expression[], position: n
 ── Pipe (1) ──────────────────────────────────
 PipeExpression        { left: Expression, right: Expression, position: number }
 
+── Bindings (1) ──────────────────────────────
+LetExpression         { name: string, value: Expression, body: Expression, position: number }
+
 ── Spread (1) ────────────────────────────────
 SpreadElement         { argument: Expression, position: number }
-                      // NOTE: SpreadElement is defined but NOT used in v0.1
-                      // Spread syntax is deferred to v0.2
+                      // Used in ArrayExpression.elements and ObjectExpression.properties
 ```
 
 ### Property (used in ObjectExpression)
@@ -842,23 +1015,22 @@ Pratt is superior for expression languages because:
 | # | Deliverable | Status |
 |---|---|---|
 | 1 | Grammar spec (EBNF) — this document | ✓ |
-| 2 | Conformance test suite (YAML, 120+ cases) | In progress |
-| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) | In progress |
-| 4 | Python runtime (`xpr-lang` on PyPI) | Planned |
-| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) | Planned |
-| 6 | Playground (web) | Planned |
+| 2 | Conformance test suite (YAML, 250+ cases) | ✓ |
+| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.2.0 | ✓ |
+| 4 | Python runtime v0.2.0 | ✓ |
+| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.2.0 | ✓ |
+| 6 | Playground (web, CodeMirror 6) | ✓ |
 
 ---
 
-## Future (v0.2+)
+## Future (v0.3+)
 
-Features explicitly deferred from v0.1:
+Features explicitly deferred from v0.2:
 
 | Feature | Reason for Deferral |
 |---------|---------------------|
 | **Date/time functions** | Timezone handling, format parsing, locale — enormous complexity |
-| **Spread operator** (`...`) | Three distinct grammar contexts (array, object, function args) — each is a separate parser rule |
-| **`let` bindings** | Requires scope management, changes expression-only model |
+| **Spread in function calls** (`fn(...args)`) | Requires variadic call-site handling — deferred to v0.3 |
 | **Destructuring** | Complex grammar, multiple forms (array, object, nested) |
 | **Pattern matching** | Requires type system extensions |
 | **Async expressions** | Fundamentally changes evaluation model |
