@@ -30,6 +30,10 @@ The `conformance/` directory contains YAML test files organized by category:
 - `strings.yaml` — String methods
 - `collections.yaml` — Array collection methods
 - `pipe.yaml` — Pipe operator
+- `let.yaml` — Let bindings, scoping, shadowing, closures
+- `spread.yaml` — Array and object spread operator
+- `methods_v2.yaml` — New array, string, object methods and range function (v0.2)
+- `examples.yaml` — End-to-end integration examples
 
 See [conformance/SCHEMA.md](./conformance/SCHEMA.md) for the test format specification.
 
