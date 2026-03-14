@@ -2,7 +2,7 @@
 
 A sandboxed expression language with JS/Python-familiar syntax, designed for data pipeline transforms, with native interpreters in JavaScript, Python, and Go.
 
-**Version**: 0.3.0  
+**Version**: 0.4.0  
 **Status**: Draft
 
 ---
@@ -766,7 +766,7 @@ XprError {
 
 ## EBNF Grammar
 
-Formal grammar for XPR v0.2. Uses standard EBNF notation:
+Formal grammar for XPR v0.4. Uses standard EBNF notation:
 - `*` = zero or more
 - `+` = one or more
 - `?` = optional
@@ -779,8 +779,13 @@ Formal grammar for XPR v0.2. Uses standard EBNF notation:
 Expression     ::= LetExpression
                | PipeExpr
 
-(* Let bindings — immutable, scoped *)
-LetExpression  ::= "let" Identifier "=" Expression ";" Expression
+(* Let bindings — immutable, scoped. Supports destructuring patterns. *)
+LetExpression  ::= "let" BindingTarget "=" Expression ";" Expression
+
+(* Binding target — identifier or destructuring pattern *)
+BindingTarget  ::= Identifier
+               | ObjectPattern
+               | ArrayPattern
 
 (* Pipe — lowest precedence, left-associative *)
 PipeExpr       ::= TernaryExpr ( "|>" TernaryExpr )*
@@ -833,12 +838,17 @@ Primary        ::= Literal
                | ObjectLiteral
                | TemplateLiteral
                | ArrowFunction
+               | RegexLiteral
 
-(* Arrow functions *)
+(* Arrow functions — params support destructuring patterns *)
 ArrowFunction  ::= Identifier "=>" Expression
                | "(" ParamList? ")" "=>" Expression
 
-ParamList      ::= Identifier ( "," Identifier )*
+ParamList      ::= ParamElement ( "," ParamElement )*
+
+ParamElement   ::= Identifier                          (* simple parameter *)
+               | ObjectPattern                         (* destructured object param *)
+               | ArrayPattern                          (* destructured array param *)
 
 ArgList        ::= ArgElement ( "," ArgElement )*
 
@@ -857,6 +867,28 @@ ObjectEntry    ::= "..." Expression                (* spread *)
                | Property                          (* regular property *)
 
 Property       ::= ( Identifier | StringLiteral ) ":" Expression
+
+(* Destructuring patterns — used in let bindings and arrow function params *)
+ObjectPattern  ::= "{" ( ObjectPatternEntry ( "," ObjectPatternEntry )* )? "}"
+
+ObjectPatternEntry ::= "..." Identifier                                    (* rest: {...rest} *)
+               | Identifier "=" Expression                                 (* shorthand with default: {name = "x"} *)
+               | Identifier                                                (* shorthand: {name} ≡ {name: name} *)
+               | ( Identifier | StringLiteral ) ":" BindingTarget         (* rename: {name: n} or nested: {a: {b}} *)
+               | ( Identifier | StringLiteral ) ":" BindingTarget "=" Expression  (* rename with default *)
+
+ArrayPattern   ::= "[" ( ArrayPatternEntry ( "," ArrayPatternEntry )* )? "]"
+
+ArrayPatternEntry ::= "..." Identifier                                     (* rest: [...tail] *)
+               | BindingTarget                                             (* element: [a] or nested: [[a,b]] *)
+               | BindingTarget "=" Expression                              (* element with default: [a = 0] *)
+
+(* Regex literals — context-based tokenizer disambiguation *)
+RegexLiteral   ::= "/" RegexBody "/" RegexFlags?
+
+RegexBody      ::= RegexChar+                                              (* any chars except unescaped / *)
+
+RegexFlags     ::= ( "i" | "m" | "s" )+                                   (* case-insensitive, multiline, dotall *)
 
 TemplateLiteral ::= "`" TemplateContent* "`"
 
@@ -981,18 +1013,20 @@ Custom functions are called like built-in functions. They receive evaluated argu
 
 ## AST Node Types
 
-19 node types. ESTree-influenced, simplified for expression-only context.
+27 node types. ESTree-influenced, simplified for expression-only context.
 
 Every node carries a `position` field (character offset) for error reporting.
 
 ```
-── Literals (6) ──────────────────────────────
+── Literals (7) ──────────────────────────────
 NumberLiteral         { value: number, position: number }
 StringLiteral         { value: string, position: number }
 BooleanLiteral        { value: boolean, position: number }
 NullLiteral           { position: number }
 ArrayExpression       { elements: Expression[], position: number }
 ObjectExpression      { properties: Property[], position: number }
+RegexLiteral          { pattern: string, flags: string, position: number }
+                      // flags: subset of "ims" — case-insensitive, multiline, dotall
 
 ── Access (2) ────────────────────────────────
 Identifier            { name: string, position: number }
@@ -1012,7 +1046,8 @@ ConditionalExpression { test: Expression, consequent: Expression,
                         alternate: Expression, position: number }
 
 ── Functions (2) ─────────────────────────────
-ArrowFunction         { params: string[], body: Expression, position: number }
+ArrowFunction         { params: (string | DestructurePattern)[], body: Expression, position: number }
+                      // params: simple identifiers OR destructuring patterns
 CallExpression        { callee: Expression, arguments: Expression[],
                         optional: boolean, position: number }
 
@@ -1023,11 +1058,32 @@ TemplateLiteral       { quasis: string[], expressions: Expression[], position: n
 PipeExpression        { left: Expression, right: Expression, position: number }
 
 ── Bindings (1) ──────────────────────────────
-LetExpression         { name: string, value: Expression, body: Expression, position: number }
+LetExpression         { name: string | DestructurePattern, value: Expression, body: Expression, position: number }
+                      // name: simple identifier OR destructuring pattern
 
 ── Spread (1) ────────────────────────────────
 SpreadElement         { argument: Expression, position: number }
                       // Used in ArrayExpression.elements, ObjectExpression.properties, and CallExpression.arguments
+
+── Destructuring Patterns (6) ────────────────
+ObjectPattern         { properties: PatternProperty[], position: number }
+                      // Used in LetExpression.name and ArrowFunction.params
+
+ArrayPattern          { elements: ArrayPatternElement[], position: number }
+                      // Used in LetExpression.name and ArrowFunction.params
+
+PatternProperty       { key: string, value: BindingTarget, defaultValue: Expression | null, shorthand: boolean, position: number }
+                      // shorthand=true: {name} ≡ {name: name}
+                      // defaultValue: expression evaluated when value is null
+
+ArrayPatternElement   { element: BindingTarget | null, defaultValue: Expression | null, position: number }
+                      // element=null for holes (not supported — reserved)
+
+RestElement           { argument: Identifier, position: number }
+                      // Must be last element in ObjectPattern or ArrayPattern
+
+DestructurePattern    ::= ObjectPattern | ArrayPattern
+                      // Union type used in LetExpression.name and ArrowFunction.params
 ```
 
 ### Property (used in ObjectExpression)
@@ -1125,29 +1181,175 @@ Pratt is superior for expression languages because:
 
 ---
 
+## Destructuring (v0.4)
+
+Destructuring binds values from objects and arrays to named variables. Supported in `let` bindings and arrow function parameters.
+
+### Object Destructuring
+
+```javascript
+let {name, age} = user; name                    // shorthand: binds user.name to name
+let {name: n, age: a} = user; n                // rename: binds user.name to n
+let {name = "Anonymous"} = {}; name             // default: "Anonymous" when null
+let {a, ...rest} = {a: 1, b: 2, c: 3}; rest   // rest: {b: 2, c: 3}
+let {address: {city}} = user; city              // nested: extracts user.address.city
+```
+
+### Array Destructuring
+
+```javascript
+let [first, second] = [1, 2, 3]; first         // 1
+let [head, ...tail] = [1, 2, 3]; tail          // [2, 3]
+let [a = 0, b = 0] = [1]; b                   // 0 (default for missing)
+let [[a, b], [c, d]] = [[1, 2], [3, 4]]; c    // 3 (nested)
+```
+
+### In Arrow Function Parameters
+
+```javascript
+({name}) => name.toUpperCase()
+([a, b]) => a + b
+users.map(({name, age}) => `${name}: ${age}`)
+users.filter(({age}) => age >= 18)
+```
+
+### Semantics
+
+- **Missing property**: returns `null` (consistent with property access)
+- **Null source**: error — `let {name} = null` throws "cannot destructure null"
+- **Default values**: evaluated when the extracted value is `null`
+- **Rest element**: must be last. Collects remaining keys/elements into object/array.
+- **Shorthand**: `{name}` is equivalent to `{name: name}`
+- **Nested**: patterns can be arbitrarily nested
+
+### Edge Cases
+
+| Expression | Result |
+|------------|--------|
+| `let {} = obj; 1` | Valid — binds nothing, returns 1 |
+| `let [] = arr; 1` | Valid — binds nothing, returns 1 |
+| `let {a, a} = obj` | Error: duplicate binding 'a' |
+| `let {a: b, a: c} = obj` | Valid — different targets, same source key |
+| `let {name} = [1,2,3]` | null (arrays don't have .name) |
+| `let [a] = {a: 1}` | Error: cannot destructure non-array as array |
+| `let [a] = "hello"` | Error: cannot destructure string as array |
+| `let [a,b,c] = [1,2]` | c = null (out of bounds) |
+| `let [a,...rest] = []` | a = null, rest = [] |
+| `let {a,...rest} = {a:1}` | rest = {} |
+
+### Not Supported
+
+- Array holes/elision: `[a,,b]` — not valid
+- Computed keys: `{[expr]: val}` — not valid
+- Standalone assignment: `{a} = obj` without `let` — not valid
+- Rest element in non-last position
+
+---
+
+## Regex Literals (v0.4)
+
+Regex literals provide a first-class `regex` type. They coexist with the function-based regex API from v0.3 (`matches`, `match`, `matchAll`, `replacePattern`).
+
+### Syntax
+
+```javascript
+/pattern/          // basic regex
+/pattern/i         // case-insensitive
+/pattern/im        // case-insensitive + multiline
+```
+
+**Supported flags**: `i` (case-insensitive), `m` (multiline), `s` (dotall). No `g` flag — replace is always all-matches, match/test is always first-match.
+
+**RE2 constraint**: Patterns must be RE2-compatible. No lookahead, lookbehind, backreferences, or atomic groups.
+
+### Tokenizer Disambiguation
+
+`/` is a **regex delimiter** when the previous non-whitespace token is one of:
+- Start of input
+- `=`, `==`, `!=`, `(`, `[`, `{`, `,`, `;`, `?`, `:`, `|>`, `=>`, `&&`, `||`, `??`, `!`, `+`, `-`, `*`, `/`, `%`, `**`, `<`, `>`, `<=`, `>=`, `...`, `let`
+
+`/` is a **division operator** when the previous token is one of:
+- `)`, `]`, `}`, Identifier, Number, String, Boolean, Null, TemplateTail, Regex
+
+### Regex Type
+
+`regex` is the 7th XPR type. `type(/\d+/)` returns `"regex"`.
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `type(/\d+/)` | regex | `"regex"` |
+| `string(/\d+/i)` | regex | `"/\\d+/i"` |
+| `bool(/\d+/)` | regex | `true` (non-null) |
+
+### Regex Methods
+
+```javascript
+/\d+/.test("abc123")          // true — matches anywhere in string
+/\d+/.test("no digits")       // false
+/hello/i.test("Hello World")  // true — case-insensitive
+```
+
+### String Methods with Regex
+
+```javascript
+"order-123".match(/\d+/)                          // "123" — first match or null
+"no digits".match(/\d+/)                          // null
+"hello world".replace(/o/, "0")                   // "hell0 w0rld" — replaces ALL
+"2024-01-15".replace(/(\d{4})-(\d{2})-(\d{2})/, "$3/$2/$1")  // "15/01/2024"
+```
+
+### Equality
+
+```javascript
+/abc/ == /abc/    // true — same pattern, same flags
+/abc/i == /abc/   // false — different flags
+/abc/ == "abc"    // false — different types
+```
+
+### Error Cases
+
+```javascript
+/\d+/.test(42)              // Error: Type error — test expects string
+"str".replace(/\d+/, 42)    // Error: Type error — replacement must be string
+/\d+/ + "str"               // Error: Type error — cannot add regex and string
+/\d+/ < /abc/               // Error: Type error — cannot compare regex values
+```
+
+### Not Supported
+
+- Regex properties: `.source`, `.flags`, `.global`
+- Regex methods beyond `.test()`
+- `str.split(/regex/)` — use `str.split(str)` instead
+- `str.matchAll(/regex/)` — use global `matchAll(str, pattern)` instead
+- Regex constructor function: `regex("pattern")` — use literals only
+- Regex in context objects — construction via literals only
+- `g` flag — all replace operations are global, all match/test are first-match
+
+---
+
 ## Deliverables
 
 | # | Deliverable | Status |
 |---|---|---|
 | 1 | Grammar spec (EBNF) — this document | ✓ |
 | 2 | Conformance test suite (YAML, 250+ cases) | ✓ |
-| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.3.0 | ✓ |
-| 4 | Python runtime v0.3.0 | ✓ |
-| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.3.0 | ✓ |
+| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.4.0 | ✓ |
+| 4 | Python runtime v0.4.0 | ✓ |
+| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.4.0 | ✓ |
 | 6 | Playground (web, CodeMirror 6) | ✓ |
 
 ---
 
-## Future (v0.4+)
+## Future (v0.5+)
 
-Features explicitly deferred from v0.3:
+Features explicitly deferred from v0.4:
 
 | Feature | Reason for Deferral |
 |---------|---------------------|
-| **Destructuring** | Complex grammar, multiple forms (array, object, nested) |
 | **Pattern matching** | Requires type system extensions |
 | **Async expressions** | Fundamentally changes evaluation model |
 | **Custom operator overloading** | Requires type system |
 | **Type annotations** | Requires type system |
-| **Regex literals** | `/pattern/flags` syntax — adds tokenizer complexity. Function-based regex (`matches`, `match`, etc.) is supported in v0.3. |
 | **Timezone-aware dates** | IANA timezone database, DST handling — enormous complexity. UTC-only date functions are supported in v0.3. |
+| **Regex literals with `g` flag** | All replace/match operations are already implicitly global/first-match. |
+| **`str.split(/regex/)`** | Deferred — use `str.split(str)` for now. |
