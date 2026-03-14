@@ -1,0 +1,98 @@
+suite: negative_indexing
+version: "0.3.0"
+tests:
+  # ── Basic negative indexing ────────────────────────────────────────────────
+
+  - name: negative index last element
+    expression: "[1, 2, 3][-1]"
+    expected: 3
+    tags: ["negative_indexing"]
+
+  - name: negative index second to last
+    expression: "[1, 2, 3][-2]"
+    expected: 2
+    tags: ["negative_indexing"]
+
+  - name: negative index first element via negative
+    expression: "[1, 2, 3][-3]"
+    expected: 1
+    tags: ["negative_indexing"]
+
+  - name: negative zero index is first element
+    expression: "[1, 2, 3][-0]"
+    expected: 1
+    tags: ["negative_indexing"]
+
+  # ── Out of bounds ──────────────────────────────────────────────────────────
+
+  - name: negative index on empty array returns null
+    expression: "[][- 1]"
+    expected: null
+    tags: ["negative_indexing"]
+
+  - name: negative index out of bounds returns null
+    expression: "[1, 2, 3][-4]"
+    expected: null
+    tags: ["negative_indexing"]
+
+  - name: negative index far out of bounds returns null
+    expression: "[1, 2, 3][-99]"
+    expected: null
+    tags: ["negative_indexing"]
+
+  # ── Fractional negative indices (truncation) ───────────────────────────────
+
+  - name: negative fractional index truncates to -1 (1.7)
+    expression: "[1, 2, 3][-1.7]"
+    expected: 3
+    tags: ["negative_indexing"]
+
+  - name: negative fractional index truncates to -1 (1.2)
+    expression: "[1, 2, 3][-1.2]"
+    expected: 3
+    tags: ["negative_indexing"]
+
+  # ── Context variables ──────────────────────────────────────────────────────
+
+  - name: negative index with context variable last element
+    expression: "items[-1]"
+    context:
+      items: [10, 20, 30]
+    expected: 30
+    tags: ["negative_indexing"]
+
+  - name: negative index with context variable second to last
+    expression: "items[-2]"
+    context:
+      items: ["a", "b", "c"]
+    expected: "b"
+    tags: ["negative_indexing"]
+
+  # ── Chained and combined ───────────────────────────────────────────────────
+
+  - name: chained negative index on nested array
+    expression: "[[1, 2], [3, 4]][-1][-1]"
+    expected: 4
+    tags: ["negative_indexing"]
+
+  - name: negative index on single element array
+    expression: "[42][-1]"
+    expected: 42
+    tags: ["negative_indexing"]
+
+  - name: negative index combined with positive index arithmetic
+    expression: "let a = [1, 2, 3]; a[-1] + a[0]"
+    expected: 4
+    tags: ["negative_indexing"]
+
+  # ── Error cases ────────────────────────────────────────────────────────────
+
+  - name: negative index on string is error
+    expression: '"hello"[-1]'
+    error: "Cannot"
+    tags: ["negative_indexing"]
+
+  - name: negative index on non-array number is error
+    expression: "42[-1]"
+    error: "Cannot"
+    tags: ["negative_indexing"]

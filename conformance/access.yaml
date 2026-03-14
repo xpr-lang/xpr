@@ -63,11 +63,11 @@ tests:
     expected: null
     tags: ["level-1", "core"]
 
-  - name: negative indexing is error
+  - name: negative indexing returns last element
     expression: "items[-1]"
     context:
       items: [1, 2, 3]
-    error: "negative"
+    expected: 3
     tags: ["level-1", "core"]
 
   - name: optional chaining on existing property

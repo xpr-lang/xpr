@@ -2,7 +2,7 @@
 
 A sandboxed expression language with JS/Python-familiar syntax, designed for data pipeline transforms, with native interpreters in JavaScript, Python, and Go.
 
-**Version**: 0.2.0  
+**Version**: 0.3.0  
 **Status**: Draft
 
 ---
@@ -104,7 +104,24 @@ The spread operator (`...`) expands arrays or objects in-place.
 - `{...[1,2]}` → error: "Cannot spread array into object"
 - `{...42}` → error: "Cannot spread non-object"
 
-**NOT supported in v0.2**: Spread in function call arguments (`fn(...args)`) — deferred to v0.3.
+**Spread in function call arguments (v0.3)**:
+
+```javascript
+fn(...args)              // spread array as arguments
+fn(a, ...rest)           // mix regular and spread arguments
+fn(...a, b, ...c)        // multiple spreads with interspersed values
+obj.method(...args)      // works with method calls
+x |> fn(...rest)         // pipe prepends x, then spread expands: fn(x, rest[0], rest[1], ...)
+```
+
+**Error cases** (consistent with array/object spread):
+```javascript
+fn(...null)    // Error: Cannot spread null
+fn(...42)      // Error: Cannot spread non-array
+fn(..."hello") // Error: Cannot spread string into arguments
+```
+
+**NOT supported**: Spread in arrow function parameter definitions (`(...args) => ...` rest params are not supported).
 
 ---
 
@@ -278,8 +295,14 @@ Accessing an array index that doesn't exist returns `null`:
 
 ```
 items[99]   // null if items has fewer than 100 elements
-items[-1]   // error — negative indexing not supported in v0.1
+items[-1]   // last element (equivalent to items[items.length - 1])
+items[-2]   // second-to-last element
+items[-0]   // first element (-0 === 0 in IEEE 754)
+[][- 1]     // null — out of bounds on empty array
+items[-99]  // null — out of bounds if abs(index) > length
 ```
+
+Negative index `n` accesses `arr[arr.length + n]`. Returns `null` if the result is still out of bounds. Fractional negative indices are truncated to integer (e.g., `-1.7` → `-1`). Applies to arrays only — not strings.
 
 ### Division by Zero
 
@@ -614,6 +637,95 @@ Called on object values using dot notation:
 | `keys` | `() → array` | Array of property names |
 | `values` | `() → array` | Array of property values |
 
+### Date/Time Functions (v0.3)
+
+Dates are represented as **epoch milliseconds** (number type). All operations are UTC. There is no separate `date` type.
+
+| Function | Signature | Returns | Notes |
+|----------|-----------|---------|-------|
+| `now` | `() → number` | Epoch ms | Current UTC timestamp |
+| `parseDate` | `(str, format?) → number` | Epoch ms | Default: ISO 8601. Custom format uses ICU tokens. |
+| `formatDate` | `(date, format) → string` | Formatted string | ICU tokens only (see below) |
+| `year` | `(date) → number` | Year (e.g., 2024) | UTC |
+| `month` | `(date) → number` | Month 1–12 | 1-indexed |
+| `day` | `(date) → number` | Day 1–31 | UTC |
+| `hour` | `(date) → number` | Hour 0–23 | UTC |
+| `minute` | `(date) → number` | Minute 0–59 | UTC |
+| `second` | `(date) → number` | Second 0–59 | UTC |
+| `millisecond` | `(date) → number` | Millisecond 0–999 | UTC |
+| `dateAdd` | `(date, amount, unit) → number` | Epoch ms | Fractional amounts truncated. Month overflow: Jan 31 + 1 month = Mar 2/3. |
+| `dateDiff` | `(date1, date2, unit) → number` | Signed integer | `date1 < date2` → positive. Truncated to integer. |
+
+**ICU Format Tokens** (closed set — no others supported):
+
+| Token | Meaning | Example |
+|-------|---------|---------|
+| `yyyy` | 4-digit year | `2024` |
+| `MM` | 2-digit month (01–12) | `06` |
+| `dd` | 2-digit day (01–31) | `15` |
+| `HH` | 2-digit hour 24h (00–23) | `10` |
+| `mm` | 2-digit minute (00–59) | `30` |
+| `ss` | 2-digit second (00–59) | `45` |
+| `SSS` | 3-digit millisecond (000–999) | `123` |
+
+All other characters in the format string are treated as literals.
+
+**Units for `dateAdd`/`dateDiff`**: `"years"`, `"months"`, `"days"`, `"hours"`, `"minutes"`, `"seconds"`, `"milliseconds"`
+
+```javascript
+now()                                              // e.g. 1710000000000
+parseDate("2024-01-15T12:00:00Z")                  // 1705320000000
+parseDate("15/01/2024", "dd/MM/yyyy")              // 1705276800000
+formatDate(0, "yyyy-MM-dd")                        // "1970-01-01"
+formatDate(parseDate("2024-06-15T10:30:45Z"), "HH:mm:ss")  // "10:30:45"
+year(parseDate("2024-06-15T10:30:00Z"))            // 2024
+month(parseDate("2024-06-15T10:30:00Z"))           // 6
+day(parseDate("2024-06-15T10:30:00Z"))             // 15
+dateAdd(parseDate("2024-01-31T00:00:00Z"), 1, "months")    // epoch ms for 2024-03-02
+dateDiff(parseDate("2024-01-01T00:00:00Z"), parseDate("2024-01-08T00:00:00Z"), "days")  // 7
+dateDiff(parseDate("2024-01-08T00:00:00Z"), parseDate("2024-01-01T00:00:00Z"), "days")  // -7
+```
+
+**Error cases**:
+```javascript
+parseDate(42)                    // Error: Type error — expected string
+parseDate("not-a-date")          // Error: invalid date string
+year(null)                       // Error: Type error — expected number
+dateAdd(now(), 1, "weeks")       // Error: invalid unit "weeks"
+```
+
+### Regex Functions (v0.3)
+
+Function-based regex using **RE2 flavor**. No literal syntax (`/pattern/` is not supported). Inline flags via RE2 syntax (e.g., `(?i)` for case-insensitive).
+
+**RE2 constraint**: No lookahead, lookbehind, backreferences, or atomic groups.
+
+| Function | Signature | Returns | Notes |
+|----------|-----------|---------|-------|
+| `matches` | `(str, pattern) → boolean` | `boolean` | Searches for pattern anywhere in string |
+| `match` | `(str, pattern) → string \| null` | First matched substring or `null` | Returns string, not a match object |
+| `matchAll` | `(str, pattern) → array` | Array of matched strings | Non-overlapping. Empty array if no matches. |
+| `replacePattern` | `(str, pattern, replacement) → string` | New string | Replaces ALL matches. `$1`/`$2` for group references. |
+
+```javascript
+matches("hello world", "\\d+")                              // false
+matches("hello 42", "\\d+")                                 // true
+matches("Hello", "(?i)hello")                               // true
+match("order-123", "\\d+")                                  // "123"
+match("no digits", "\\d+")                                  // null
+matchAll("a1b2c3", "\\d+")                                  // ["1", "2", "3"]
+matchAll("no digits", "\\d+")                               // []
+replacePattern("hello world", "o", "0")                     // "hell0 w0rld"
+replacePattern("2024-01-15", "(\\d{4})-(\\d{2})-(\\d{2})", "$3/$2/$1")  // "15/01/2024"
+```
+
+**Error cases**:
+```javascript
+matches(42, "\\d+")          // Error: Type error — expected string
+matches("test", "[invalid")  // Error: invalid regex pattern
+match(null, "x")             // Error: Type error — expected string
+```
+
 ---
 
 ## Error Model
@@ -728,7 +840,10 @@ ArrowFunction  ::= Identifier "=>" Expression
 
 ParamList      ::= Identifier ( "," Identifier )*
 
-ArgList        ::= Expression ( "," Expression )*
+ArgList        ::= ArgElement ( "," ArgElement )*
+
+ArgElement     ::= "..." Expression                (* spread argument *)
+               | Expression                        (* regular argument *)
 
 (* Literals — arrays and objects support spread elements *)
 ArrayLiteral   ::= "[" ( ArrayElement ( "," ArrayElement )* )? "]"
@@ -912,7 +1027,7 @@ LetExpression         { name: string, value: Expression, body: Expression, posit
 
 ── Spread (1) ────────────────────────────────
 SpreadElement         { argument: Expression, position: number }
-                      // Used in ArrayExpression.elements and ObjectExpression.properties
+                      // Used in ArrayExpression.elements, ObjectExpression.properties, and CallExpression.arguments
 ```
 
 ### Property (used in ObjectExpression)
@@ -1016,25 +1131,23 @@ Pratt is superior for expression languages because:
 |---|---|---|
 | 1 | Grammar spec (EBNF) — this document | ✓ |
 | 2 | Conformance test suite (YAML, 250+ cases) | ✓ |
-| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.2.0 | ✓ |
-| 4 | Python runtime v0.2.0 | ✓ |
-| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.2.0 | ✓ |
+| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.3.0 | ✓ |
+| 4 | Python runtime v0.3.0 | ✓ |
+| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.3.0 | ✓ |
 | 6 | Playground (web, CodeMirror 6) | ✓ |
 
 ---
 
-## Future (v0.3+)
+## Future (v0.4+)
 
-Features explicitly deferred from v0.2:
+Features explicitly deferred from v0.3:
 
 | Feature | Reason for Deferral |
 |---------|---------------------|
-| **Date/time functions** | Timezone handling, format parsing, locale — enormous complexity |
-| **Spread in function calls** (`fn(...args)`) | Requires variadic call-site handling — deferred to v0.3 |
 | **Destructuring** | Complex grammar, multiple forms (array, object, nested) |
 | **Pattern matching** | Requires type system extensions |
 | **Async expressions** | Fundamentally changes evaluation model |
 | **Custom operator overloading** | Requires type system |
 | **Type annotations** | Requires type system |
-| **Regex literals** | `/pattern/flags` syntax — adds tokenizer complexity |
-| **Negative array indexing** | `items[-1]` — requires special-casing in evaluator |
+| **Regex literals** | `/pattern/flags` syntax — adds tokenizer complexity. Function-based regex (`matches`, `match`, etc.) is supported in v0.3. |
+| **Timezone-aware dates** | IANA timezone database, DST handling — enormous complexity. UTC-only date functions are supported in v0.3. |
