@@ -45,7 +45,7 @@ tests:
 
   - name: matches error non-string first arg
     expression: 'matches(42, "\\d+")'
-    error: "type"
+    error: "Type error"
     tags: ["regex", "matches", "error"]
 
   - name: matches error invalid regex pattern
@@ -92,7 +92,7 @@ tests:
 
   - name: match error null first arg
     expression: 'match(null, "\\d+")'
-    error: "type"
+    error: "Type error"
     tags: ["regex", "match", "error"]
 
   - name: match error invalid regex pattern
@@ -139,7 +139,7 @@ tests:
 
   - name: matchAll error non-string first arg
     expression: 'matchAll(42, "\\d+")'
-    error: "type"
+    error: "Type error"
     tags: ["regex", "matchAll", "error"]
 
   - name: matchAll error invalid regex pattern
@@ -186,7 +186,7 @@ tests:
 
   - name: replacePattern error non-string first arg
     expression: 'replacePattern(42, "\\d+", "X")'
-    error: "type"
+    error: "Type error"
     tags: ["regex", "replacePattern", "error"]
 
   - name: replacePattern error invalid regex pattern
