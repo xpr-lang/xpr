@@ -1,0 +1,324 @@
+suite: datetime
+version: "0.3.0"
+tests:
+  # ─── now() ─────────────────────────────────────────────────────────────────
+  - name: now returns a number
+    expression: "type(now())"
+    expected: "number"
+    tags: ["datetime"]
+
+  - name: now returns positive value
+    expression: "now() > 0"
+    expected: true
+    tags: ["datetime"]
+
+  - name: now is greater than year 2020 epoch
+    expression: "now() > 1577836800000"
+    expected: true
+    tags: ["datetime"]
+
+  # ─── parseDate() ───────────────────────────────────────────────────────────
+  - name: parseDate unix epoch ISO 8601
+    expression: 'parseDate("1970-01-01T00:00:00Z")'
+    expected: 0
+    tags: ["datetime"]
+
+  - name: parseDate known timestamp
+    expression: 'parseDate("2024-01-15T12:00:00Z")'
+    expected: 1705320000000
+    tags: ["datetime"]
+
+  - name: parseDate date only midnight UTC
+    expression: 'parseDate("2024-01-15")'
+    expected: 1705276800000
+    tags: ["datetime"]
+
+  - name: parseDate with custom format dd/MM/yyyy
+    expression: 'parseDate("15/01/2024", "dd/MM/yyyy")'
+    expected: 1705276800000
+    tags: ["datetime"]
+
+  - name: parseDate with custom format yyyy-MM-dd
+    expression: 'parseDate("2024-06-15", "yyyy-MM-dd")'
+    expected: 1718409600000
+    tags: ["datetime"]
+
+  - name: parseDate returns number type
+    expression: 'type(parseDate("2024-01-15T12:00:00Z"))'
+    expected: "number"
+    tags: ["datetime"]
+
+  - name: parseDate with non-string argument
+    expression: "parseDate(42)"
+    error: "Type error"
+    tags: ["datetime"]
+
+  - name: parseDate with invalid date string
+    expression: 'parseDate("not-a-date")'
+    error: "invalid"
+    tags: ["datetime"]
+
+  - name: parseDate with null argument
+    expression: "parseDate(null)"
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── formatDate() ──────────────────────────────────────────────────────────
+  - name: formatDate epoch to yyyy-MM-dd
+    expression: 'formatDate(0, "yyyy-MM-dd")'
+    expected: "1970-01-01"
+    tags: ["datetime"]
+
+  - name: formatDate epoch to HH:mm:ss
+    expression: 'formatDate(0, "HH:mm:ss")'
+    expected: "00:00:00"
+    tags: ["datetime"]
+
+  - name: formatDate epoch to full datetime
+    expression: 'formatDate(0, "yyyy-MM-dd HH:mm:ss")'
+    expected: "1970-01-01 00:00:00"
+    tags: ["datetime"]
+
+  - name: formatDate epoch milliseconds SSS
+    expression: 'formatDate(0, "SSS")'
+    expected: "000"
+    tags: ["datetime"]
+
+  - name: formatDate parsed date to yyyy-MM-dd
+    expression: 'formatDate(parseDate("2024-06-15T10:30:45Z"), "yyyy-MM-dd")'
+    expected: "2024-06-15"
+    tags: ["datetime"]
+
+  - name: formatDate parsed date to HH:mm:ss
+    expression: 'formatDate(parseDate("2024-06-15T10:30:45Z"), "HH:mm:ss")'
+    expected: "10:30:45"
+    tags: ["datetime"]
+
+  - name: formatDate returns string type
+    expression: 'type(formatDate(0, "yyyy-MM-dd"))'
+    expected: "string"
+    tags: ["datetime"]
+
+  - name: formatDate with non-number date argument
+    expression: 'formatDate("not-a-number", "yyyy")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── year() ────────────────────────────────────────────────────────────────
+  - name: year extractor
+    expression: 'year(parseDate("2024-06-15T10:30:45Z"))'
+    expected: 2024
+    tags: ["datetime"]
+
+  - name: year of epoch
+    expression: "year(0)"
+    expected: 1970
+    tags: ["datetime"]
+
+  - name: year with null argument
+    expression: "year(null)"
+    error: "Type error"
+    tags: ["datetime"]
+
+  - name: year with string argument
+    expression: 'year("2024")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── month() ───────────────────────────────────────────────────────────────
+  - name: month extractor
+    expression: 'month(parseDate("2024-06-15T10:30:45Z"))'
+    expected: 6
+    tags: ["datetime"]
+
+  - name: month of epoch is January
+    expression: "month(0)"
+    expected: 1
+    tags: ["datetime"]
+
+  - name: month with null argument
+    expression: "month(null)"
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── day() ─────────────────────────────────────────────────────────────────
+  - name: day extractor
+    expression: 'day(parseDate("2024-06-15T10:30:45Z"))'
+    expected: 15
+    tags: ["datetime"]
+
+  - name: day of epoch is first
+    expression: "day(0)"
+    expected: 1
+    tags: ["datetime"]
+
+  - name: day with string argument
+    expression: 'day("2024-06-15")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── hour() ────────────────────────────────────────────────────────────────
+  - name: hour extractor
+    expression: 'hour(parseDate("2024-06-15T10:30:45Z"))'
+    expected: 10
+    tags: ["datetime"]
+
+  - name: hour of epoch is zero
+    expression: "hour(0)"
+    expected: 0
+    tags: ["datetime"]
+
+  - name: hour with null argument
+    expression: "hour(null)"
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── minute() ──────────────────────────────────────────────────────────────
+  - name: minute extractor
+    expression: 'minute(parseDate("2024-06-15T10:30:45Z"))'
+    expected: 30
+    tags: ["datetime"]
+
+  - name: minute of epoch is zero
+    expression: "minute(0)"
+    expected: 0
+    tags: ["datetime"]
+
+  - name: minute with string argument
+    expression: 'minute("10:30")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── second() ──────────────────────────────────────────────────────────────
+  - name: second extractor
+    expression: 'second(parseDate("2024-06-15T10:30:45Z"))'
+    expected: 45
+    tags: ["datetime"]
+
+  - name: second of epoch is zero
+    expression: "second(0)"
+    expected: 0
+    tags: ["datetime"]
+
+  - name: second with null argument
+    expression: "second(null)"
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── millisecond() ─────────────────────────────────────────────────────────
+  - name: millisecond extractor
+    expression: 'millisecond(parseDate("2024-06-15T10:30:45.123Z"))'
+    expected: 123
+    tags: ["datetime"]
+
+  - name: millisecond of epoch is zero
+    expression: "millisecond(0)"
+    expected: 0
+    tags: ["datetime"]
+
+  - name: millisecond with string argument
+    expression: 'millisecond("123")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  # ─── dateAdd() ─────────────────────────────────────────────────────────────
+  - name: dateAdd days positive
+    expression: 'dateAdd(parseDate("2024-01-15T00:00:00Z"), 7, "days")'
+    expected: 1705881600000
+    tags: ["datetime"]
+
+  - name: dateAdd days negative
+    expression: 'dateAdd(parseDate("2024-01-15T00:00:00Z"), -7, "days")'
+    expected: 1704672000000
+    tags: ["datetime"]
+
+  - name: dateAdd months positive
+    expression: 'dateAdd(parseDate("2024-01-15T00:00:00Z"), 1, "months")'
+    expected: 1707955200000
+    tags: ["datetime"]
+
+  - name: dateAdd months overflow Jan 31 plus one month
+    expression: 'dateAdd(parseDate("2024-01-31T00:00:00Z"), 1, "months")'
+    expected: 1709337600000
+    tags: ["datetime"]
+
+  - name: dateAdd years positive
+    expression: 'dateAdd(parseDate("2024-01-15T00:00:00Z"), 1, "years")'
+    expected: 1736899200000
+    tags: ["datetime"]
+
+  - name: dateAdd hours positive
+    expression: 'dateAdd(parseDate("2024-01-15T12:00:00Z"), 3, "hours")'
+    expected: 1705330800000
+    tags: ["datetime"]
+
+  - name: dateAdd milliseconds
+    expression: 'dateAdd(parseDate("2024-01-15T12:00:00Z"), 1000, "milliseconds")'
+    expected: 1705320001000
+    tags: ["datetime"]
+
+  - name: dateAdd truncates fractional days
+    expression: 'dateAdd(parseDate("2024-01-15T00:00:00Z"), 1.7, "days")'
+    expected: 1705363200000
+    tags: ["datetime"]
+
+  - name: dateAdd invalid unit weeks
+    expression: 'dateAdd(now(), 1, "weeks")'
+    error: "invalid unit"
+    tags: ["datetime"]
+
+  - name: dateAdd with non-date first argument
+    expression: 'dateAdd("not-a-date", 1, "days")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  - name: dateAdd returns number type
+    expression: 'type(dateAdd(0, 1, "days"))'
+    expected: "number"
+    tags: ["datetime"]
+
+  # ─── dateDiff() ────────────────────────────────────────────────────────────
+  - name: dateDiff days positive
+    expression: 'dateDiff(parseDate("2024-01-01T00:00:00Z"), parseDate("2024-01-08T00:00:00Z"), "days")'
+    expected: 7
+    tags: ["datetime"]
+
+  - name: dateDiff days negative signed
+    expression: 'dateDiff(parseDate("2024-01-08T00:00:00Z"), parseDate("2024-01-01T00:00:00Z"), "days")'
+    expected: -7
+    tags: ["datetime"]
+
+  - name: dateDiff same date is zero
+    expression: 'dateDiff(parseDate("2024-01-01T00:00:00Z"), parseDate("2024-01-01T00:00:00Z"), "days")'
+    expected: 0
+    tags: ["datetime"]
+
+  - name: dateDiff hours
+    expression: 'dateDiff(parseDate("2024-01-01T00:00:00Z"), parseDate("2024-01-01T12:00:00Z"), "hours")'
+    expected: 12
+    tags: ["datetime"]
+
+  - name: dateDiff months
+    expression: 'dateDiff(parseDate("2024-01-01T00:00:00Z"), parseDate("2024-02-01T00:00:00Z"), "months")'
+    expected: 1
+    tags: ["datetime"]
+
+  - name: dateDiff years
+    expression: 'dateDiff(parseDate("2024-01-01T00:00:00Z"), parseDate("2025-01-01T00:00:00Z"), "years")'
+    expected: 1
+    tags: ["datetime"]
+
+  - name: dateDiff invalid unit weeks
+    expression: 'dateDiff(now(), now(), "weeks")'
+    error: "invalid unit"
+    tags: ["datetime"]
+
+  - name: dateDiff with non-date first argument
+    expression: 'dateDiff("not-a-date", now(), "days")'
+    error: "Type error"
+    tags: ["datetime"]
+
+  - name: dateDiff returns number type
+    expression: 'type(dateDiff(0, 86400000, "days"))'
+    expected: "number"
+    tags: ["datetime"]
