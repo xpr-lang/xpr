@@ -208,7 +208,7 @@ tests:
     tags: ["regex_literals", "tokenizer", "pipe"]
 
   - name: regex after ternary colon
-    expression: "true ? /\\d+/ : /[a-z]+/"
+    expression: "string(true ? /\\d+/ : /[a-z]+/)"
     expected: "/\\d+/"
     tags: ["regex_literals", "tokenizer"]
 
