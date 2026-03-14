@@ -1,0 +1,260 @@
+suite: regex_literals
+version: "0.4.0"
+tests:
+
+  # ── Basic regex literals ───────────────────────────────────────────────────
+
+  - name: regex literal type
+    expression: "type(/\\d+/)"
+    expected: "regex"
+    tags: ["regex_literals", "type"]
+
+  - name: regex literal is truthy
+    expression: "bool(/\\d+/)"
+    expected: true
+    tags: ["regex_literals", "type"]
+
+  - name: regex literal string representation
+    expression: "string(/\\d+/)"
+    expected: "/\\d+/"
+    tags: ["regex_literals", "type"]
+
+  - name: regex literal with flags string representation
+    expression: "string(/hello/i)"
+    expected: "/hello/i"
+    tags: ["regex_literals", "type"]
+
+  - name: regex literal with multiple flags string representation
+    expression: "string(/hello/im)"
+    expected: "/hello/im"
+    tags: ["regex_literals", "type"]
+
+  - name: regex literal in let binding
+    expression: "let r = /\\d+/; type(r)"
+    expected: "regex"
+    tags: ["regex_literals", "let"]
+
+  - name: regex literal in array
+    expression: "let patterns = [/\\d+/, /[a-z]+/]; type(patterns[0])"
+    expected: "regex"
+    tags: ["regex_literals", "array"]
+
+  - name: regex literal in object
+    expression: "let obj = {pattern: /\\d+/}; type(obj.pattern)"
+    expected: "regex"
+    tags: ["regex_literals", "object"]
+
+  # ── Regex .test() method ───────────────────────────────────────────────────
+
+  - name: regex test matches
+    expression: "/\\d+/.test(\"abc123\")"
+    expected: true
+    tags: ["regex_literals", "test"]
+
+  - name: regex test no match
+    expression: "/\\d+/.test(\"no digits\")"
+    expected: false
+    tags: ["regex_literals", "test"]
+
+  - name: regex test case insensitive flag
+    expression: "/hello/i.test(\"Hello World\")"
+    expected: true
+    tags: ["regex_literals", "test", "flags"]
+
+  - name: regex test case sensitive without flag
+    expression: "/hello/.test(\"Hello World\")"
+    expected: false
+    tags: ["regex_literals", "test"]
+
+  - name: regex test empty string
+    expression: "/\\d+/.test(\"\")"
+    expected: false
+    tags: ["regex_literals", "test"]
+
+  - name: regex test stored in variable
+    expression: "let r = /\\d+/; r.test(\"abc123\")"
+    expected: true
+    tags: ["regex_literals", "test", "let"]
+
+  - name: regex test in filter
+    expression: "items.filter(s => /\\d+/.test(s))"
+    context: {items: ["abc", "123", "def", "456"]}
+    expected: ["123", "456"]
+    tags: ["regex_literals", "test", "collections"]
+
+  - name: regex test in ternary
+    expression: "/\\d+/.test(s) ? \"has digits\" : \"no digits\""
+    context: {s: "abc123"}
+    expected: "has digits"
+    tags: ["regex_literals", "test"]
+
+  # ── String .match() with regex ─────────────────────────────────────────────
+
+  - name: string match returns first match
+    expression: "\"order-123\".match(/\\d+/)"
+    expected: "123"
+    tags: ["regex_literals", "match"]
+
+  - name: string match returns null when no match
+    expression: "\"no digits\".match(/\\d+/)"
+    expected: null
+    tags: ["regex_literals", "match"]
+
+  - name: string match case insensitive
+    expression: "\"Hello World\".match(/hello/i)"
+    expected: "Hello"
+    tags: ["regex_literals", "match", "flags"]
+
+  - name: string match returns first of multiple
+    expression: "\"abc 456 def 789\".match(/\\d+/)"
+    expected: "456"
+    tags: ["regex_literals", "match"]
+
+  - name: string match with context variable
+    expression: "s.match(/\\d{4}/)"
+    context: {s: "2024-01-15"}
+    expected: "2024"
+    tags: ["regex_literals", "match"]
+
+  # ── String .replace() with regex ──────────────────────────────────────────
+
+  - name: string replace with regex replaces all
+    expression: "\"hello world\".replace(/o/, \"0\")"
+    expected: "hell0 w0rld"
+    tags: ["regex_literals", "replace"]
+
+  - name: string replace no match unchanged
+    expression: "\"no match\".replace(/\\d+/, \"X\")"
+    expected: "no match"
+    tags: ["regex_literals", "replace"]
+
+  - name: string replace case insensitive
+    expression: "\"Hello hello HELLO\".replace(/hello/i, \"hi\")"
+    expected: "hi hi hi"
+    tags: ["regex_literals", "replace", "flags"]
+
+  - name: string replace with group references
+    expression: "\"2024-01-15\".replace(/(\\d{4})-(\\d{2})-(\\d{2})/, \"$3/$2/$1\")"
+    expected: "15/01/2024"
+    tags: ["regex_literals", "replace"]
+
+  - name: string replace empty string
+    expression: "\"\".replace(/\\d+/, \"X\")"
+    expected: ""
+    tags: ["regex_literals", "replace"]
+
+  # ── Regex equality ─────────────────────────────────────────────────────────
+
+  - name: regex equality same pattern and flags
+    expression: "/abc/ == /abc/"
+    expected: true
+    tags: ["regex_literals", "equality"]
+
+  - name: regex equality different flags
+    expression: "/abc/i == /abc/"
+    expected: false
+    tags: ["regex_literals", "equality"]
+
+  - name: regex equality different patterns
+    expression: "/abc/ == /def/"
+    expected: false
+    tags: ["regex_literals", "equality"]
+
+  - name: regex inequality
+    expression: "/abc/ != /def/"
+    expected: true
+    tags: ["regex_literals", "equality"]
+
+  - name: regex not equal to string
+    expression: "/abc/ == \"abc\""
+    expected: false
+    tags: ["regex_literals", "equality"]
+
+  - name: regex equality with flags both sides
+    expression: "/hello/im == /hello/im"
+    expected: true
+    tags: ["regex_literals", "equality"]
+
+  # ── Tokenizer disambiguation ───────────────────────────────────────────────
+
+  - name: regex after equals sign
+    expression: "let r = /\\d+/; r.test(\"123\")"
+    expected: true
+    tags: ["regex_literals", "tokenizer"]
+
+  - name: regex after open paren
+    expression: "(/\\d+/).test(\"123\")"
+    expected: true
+    tags: ["regex_literals", "tokenizer"]
+
+  - name: regex after comma in array
+    expression: "[/\\d+/, /[a-z]+/].length"
+    expected: 2
+    tags: ["regex_literals", "tokenizer"]
+
+  - name: division not confused with regex
+    expression: "10 / 2 / 5"
+    expected: 1
+    tags: ["regex_literals", "tokenizer"]
+
+  - name: division after identifier not regex
+    expression: "let x = 10; x / 2"
+    expected: 5
+    tags: ["regex_literals", "tokenizer"]
+
+  - name: regex after pipe operator
+    expression: "\"abc123\" |> (s => /\\d+/.test(s))"
+    expected: true
+    tags: ["regex_literals", "tokenizer", "pipe"]
+
+  - name: regex after ternary colon
+    expression: "true ? /\\d+/ : /[a-z]+/"
+    expected: "/\\d+/"
+    tags: ["regex_literals", "tokenizer"]
+
+  # ── Cross-feature: destructuring + regex ──────────────────────────────────
+
+  - name: destructuring with regex value
+    expression: "let {pattern} = obj; pattern.test(\"abc123\")"
+    context: {obj: {pattern: null}}
+    expected: null
+    skip: true
+    tags: ["regex_literals", "destructuring"]
+
+  - name: regex in arrow function body
+    expression: "let check = s => /\\d+/.test(s); check(\"abc123\")"
+    expected: true
+    tags: ["regex_literals", "arrow"]
+
+  - name: regex in map
+    expression: "items.map(s => s.match(/\\d+/))"
+    context: {items: ["abc123", "no-digits", "456def"]}
+    expected: ["123", null, "456"]
+    tags: ["regex_literals", "collections"]
+
+  # ── Error cases ────────────────────────────────────────────────────────────
+
+  - name: regex test on non-string throws error
+    expression: "/\\d+/.test(42)"
+    error: "Type error"
+    tags: ["regex_literals", "error"]
+
+  - name: regex test on null throws error
+    expression: "/\\d+/.test(null)"
+    error: "Type error"
+    tags: ["regex_literals", "error"]
+
+  - name: string replace with non-string replacement throws error
+    expression: "\"hello\".replace(/l/, 42)"
+    error: "Type error"
+    tags: ["regex_literals", "error"]
+
+  - name: regex arithmetic throws error
+    expression: "/\\d+/ + \"str\""
+    error: "Type error"
+    tags: ["regex_literals", "error"]
+
+  - name: regex comparison throws error
+    expression: "/\\d+/ < /abc/"
+    error: "Type error"
+    tags: ["regex_literals", "error"]
