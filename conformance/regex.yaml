@@ -1,0 +1,195 @@
+suite: regex
+version: "0.3.0"
+tests:
+  # ─── matches(str, pattern) → boolean ───────────────────────────────────────
+
+  - name: matches digits in string
+    expression: 'matches("hello 42", "\\d+")'
+    expected: true
+    tags: ["regex", "matches"]
+
+  - name: matches no digits returns false
+    expression: 'matches("hello world", "\\d+")'
+    expected: false
+    tags: ["regex", "matches"]
+
+  - name: matches case-insensitive inline flag
+    expression: 'matches("Hello World", "(?i)hello")'
+    expected: true
+    tags: ["regex", "matches"]
+
+  - name: matches empty string with dot-star
+    expression: 'matches("", ".*")'
+    expected: true
+    tags: ["regex", "matches"]
+
+  - name: matches empty string no digits
+    expression: 'matches("", "\\d+")'
+    expected: false
+    tags: ["regex", "matches"]
+
+  - name: matches anchored pattern success
+    expression: 'matches("abc123", "^[a-z]+\\d+$")'
+    expected: true
+    tags: ["regex", "matches"]
+
+  - name: matches anchored pattern failure
+    expression: 'matches("abc123xyz", "^[a-z]+\\d+$")'
+    expected: false
+    tags: ["regex", "matches"]
+
+  - name: matches email-like pattern
+    expression: 'matches("user@example.com", "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+")'
+    expected: true
+    tags: ["regex", "matches"]
+
+  - name: matches error non-string first arg
+    expression: 'matches(42, "\\d+")'
+    error: "type"
+    tags: ["regex", "matches", "error"]
+
+  - name: matches error invalid regex pattern
+    expression: 'matches("test", "[invalid")'
+    error: "invalid"
+    tags: ["regex", "matches", "error"]
+
+  # ─── match(str, pattern) → string | null ───────────────────────────────────
+
+  - name: match extracts first number
+    expression: 'match("order-123", "\\d+")'
+    expected: "123"
+    tags: ["regex", "match"]
+
+  - name: match returns first occurrence only
+    expression: 'match("abc 456 def 789", "\\d+")'
+    expected: "456"
+    tags: ["regex", "match"]
+
+  - name: match returns null when no match
+    expression: 'match("no digits here", "\\d+")'
+    expected: null
+    tags: ["regex", "match"]
+
+  - name: match empty string returns null
+    expression: 'match("", "\\d+")'
+    expected: null
+    tags: ["regex", "match"]
+
+  - name: match extracts first four-digit group
+    expression: 'match("2024-01-15", "\\d{4}")'
+    expected: "2024"
+    tags: ["regex", "match"]
+
+  - name: match case-insensitive inline flag
+    expression: 'match("hello", "(?i)HELLO")'
+    expected: "hello"
+    tags: ["regex", "match"]
+
+  - name: match word boundary pattern
+    expression: 'match("cat concatenate", "[a-z]+")'
+    expected: "cat"
+    tags: ["regex", "match"]
+
+  - name: match error null first arg
+    expression: 'match(null, "\\d+")'
+    error: "type"
+    tags: ["regex", "match", "error"]
+
+  - name: match error invalid regex pattern
+    expression: 'match("test", "[bad")'
+    error: "invalid"
+    tags: ["regex", "match", "error"]
+
+  # ─── matchAll(str, pattern) → array ────────────────────────────────────────
+
+  - name: matchAll extracts all digits
+    expression: 'matchAll("a1b2c3", "\\d+")'
+    expected: ["1", "2", "3"]
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll returns empty array when no match
+    expression: 'matchAll("no digits", "\\d+")'
+    expected: []
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll empty string returns empty array
+    expression: 'matchAll("", "\\d+")'
+    expected: []
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll non-overlapping repeated char
+    expression: 'matchAll("aaa", "a")'
+    expected: ["a", "a", "a"]
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll date parts
+    expression: 'matchAll("2024-01-15", "\\d+")'
+    expected: ["2024", "01", "15"]
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll case-insensitive words
+    expression: 'matchAll("Hello World", "(?i)[a-z]+")'
+    expected: ["Hello", "World"]
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll multiple word groups
+    expression: 'matchAll("one two three", "[a-z]+")'
+    expected: ["one", "two", "three"]
+    tags: ["regex", "matchAll"]
+
+  - name: matchAll error non-string first arg
+    expression: 'matchAll(42, "\\d+")'
+    error: "type"
+    tags: ["regex", "matchAll", "error"]
+
+  - name: matchAll error invalid regex pattern
+    expression: 'matchAll("test", "[bad")'
+    error: "invalid"
+    tags: ["regex", "matchAll", "error"]
+
+  # ─── replacePattern(str, pattern, replacement) → string ────────────────────
+
+  - name: replacePattern replaces all occurrences
+    expression: 'replacePattern("hello world", "o", "0")'
+    expected: "hell0 w0rld"
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern no match returns original
+    expression: 'replacePattern("no match", "\\d+", "X")'
+    expected: "no match"
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern replace each character
+    expression: 'replacePattern("abc", ".", "X")'
+    expected: "XXX"
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern group references reorder date
+    expression: 'replacePattern("2024-01-15", "(\\d{4})-(\\d{2})-(\\d{2})", "$3/$2/$1")'
+    expected: "15/01/2024"
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern case-insensitive replacement
+    expression: 'replacePattern("hello", "(?i)HELLO", "world")'
+    expected: "world"
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern empty string returns empty
+    expression: 'replacePattern("", "\\d+", "X")'
+    expected: ""
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern strip whitespace
+    expression: 'replacePattern("  hello  world  ", "\\s+", " ")'
+    expected: " hello world "
+    tags: ["regex", "replacePattern"]
+
+  - name: replacePattern error non-string first arg
+    expression: 'replacePattern(42, "\\d+", "X")'
+    error: "type"
+    tags: ["regex", "replacePattern", "error"]
+
+  - name: replacePattern error invalid regex pattern
+    expression: 'replacePattern("test", "[bad", "X")'
+    error: "invalid"
+    tags: ["regex", "replacePattern", "error"]
