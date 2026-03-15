@@ -10,7 +10,7 @@ A sandboxed expression language with JS/Python-familiar syntax, designed for dat
 | [xpr-lang/xpr-js](https://github.com/xpr-lang/xpr-js) | JavaScript/TypeScript runtime |
 | [xpr-lang/xpr-python](https://github.com/xpr-lang/xpr-python) | Python runtime |
 | [xpr-lang/xpr-go](https://github.com/xpr-lang/xpr-go) | Go runtime |
-| [xpr-lang/xpr-docs](https://github.com/xpr-lang/xpr-docs) | Documentation site |
+| [xpr-lang/xpr-docs](https://xpr-lang.github.io/xpr-docs/) | Documentation site |
 | [xpr-lang/xpr-playground](https://github.com/xpr-lang/xpr-playground) | Interactive playground |
 
 ## Spec
