@@ -21,19 +21,28 @@ See [XPR-SPEC.md](./XPR-SPEC.md) for the complete language specification.
 
 The `conformance/` directory contains YAML test files organized by category:
 
-- `literals.yaml` — Number, string, boolean, null, array, object, template literals
-- `arithmetic.yaml` — Arithmetic operators, precedence, associativity
-- `comparison.yaml` — Equality and comparison operators
-- `logic.yaml` — Logical operators, ternary, nullish coalescing
 - `access.yaml` — Property access, optional chaining
-- `functions.yaml` — Built-in functions, custom functions, arrow functions
-- `strings.yaml` — String methods
-- `collections.yaml` — Array collection methods
-- `pipe.yaml` — Pipe operator
-- `let.yaml` — Let bindings, scoping, shadowing, closures
-- `spread.yaml` — Array and object spread operator
-- `methods_v2.yaml` — New array, string, object methods and range function (v0.2)
+- `arithmetic.yaml` — Arithmetic operators, precedence, associativity
+- `collections.yaml` — Array collection methods (v0.1)
+- `collections_v5.yaml` — New array methods (v0.5): sortBy, take, drop, sum, avg, etc.
+- `comparison.yaml` — Equality and comparison operators
+- `datetime.yaml` — Date/time functions (v0.3)
+- `destructuring.yaml` — Object and array destructuring (v0.4)
 - `examples.yaml` — End-to-end integration examples
+- `features_v5.yaml` — v0.5 features: math, type predicates, fromEntries, rest params
+- `functions.yaml` — Built-in functions, custom functions, arrow functions
+- `let.yaml` — Let bindings, scoping, shadowing, closures
+- `literals.yaml` — Number, string, boolean, null, array, object, template literals
+- `logic.yaml` — Logical operators, ternary, nullish coalescing
+- `math_v5.yaml` — Math functions and constants (v0.5)
+- `methods_v2.yaml` — v0.2 array, string, object methods and range()
+- `negative_indexing.yaml` — Negative array indexing (v0.3)
+- `pipe.yaml` — Pipe operator
+- `regex.yaml` — Regex functions (v0.3): matches, match, matchAll, replacePattern
+- `regex_literals.yaml` — Regex literal syntax and regex type (v0.4)
+- `spread.yaml` — Array and object spread operator
+- `strings.yaml` — String methods
+- `type_predicates.yaml` — Type predicate functions (v0.5)
 
 See [conformance/SCHEMA.md](./conformance/SCHEMA.md) for the test format specification.
 
