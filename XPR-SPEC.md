@@ -2,7 +2,7 @@
 
 A sandboxed expression language with JS/Python-familiar syntax, designed for data pipeline transforms, with native interpreters in JavaScript, Python, and Go.
 
-**Version**: 0.4.0  
+**Version**: 0.5.0  
 **Status**: Draft
 
 ---
@@ -121,7 +121,7 @@ fn(...42)      // Error: Cannot spread non-array
 fn(..."hello") // Error: Cannot spread string into arguments
 ```
 
-**NOT supported**: Spread in arrow function parameter definitions (`(...args) => ...` rest params are not supported).
+
 
 ---
 
@@ -1340,7 +1340,50 @@ Regex literals provide a first-class `regex` type. They coexist with the functio
 
 ---
 
-## Future (v0.5+)
+## New in v0.5
+
+### Math Functions (v0.5)
+
+| Function | Signature | Returns | Error Cases |
+|----------|-----------|---------|-------------|
+| `sqrt` | `(n: number) → number` | Square root | `sqrt(-1)` → error; type error on non-number |
+| `log` | `(n: number) → number` | Natural log | `log(0)` → error; `log(-1)` → error |
+| `pow` | `(x: number, y: number) → number` | `x^y` | Type errors |
+| `random` | `() → number` | Float in `[0, 1)` | None |
+| `sign` | `(n: number) → number` | `-1`, `0`, or `1` | Type error |
+| `trunc` | `(n: number) → number` | Truncate toward zero | Type error |
+
+### Math Constants (v0.5)
+
+`PI` = `3.141592653589793`, `E` = `2.718281828459045` — bare global identifiers.
+
+Identifier resolution order: context vars → global constants (PI, E) → global functions → custom functions → error. Context always wins.
+
+### Type Predicates (v0.5)
+
+`isNumber(v)`, `isString(v)`, `isArray(v)`, `isNull(v)`, `isObject(v)`, `isRegex(v)` — each returns `boolean`. Note: `isObject([])` → `false` (arrays are `"array"` type).
+
+### New Array Methods (v0.5)
+
+`sortBy(fn)`, `take(n)`, `drop(n)`, `count(fn)`, `sum()`, `avg()`, `compact()`, `partition(fn)`, `keyBy(fn)`, `min()`, `max()`, `first()`, `last()`.
+
+Key rules: `compact()` removes `null` only (not `false`/`0`/`""`). `[].first()` → `null`. `[].avg()` → error. `[].sum()` → `0`. `[].min()` and `[].max()` → error.
+
+### fromEntries (v0.5)
+
+`fromEntries(pairs: array) → object` — inverse of `.entries()`. Example: `fromEntries([["a",1]])` → `{"a":1}`.
+
+### str.split(/regex/) Overload (v0.5)
+
+`"a1b2c3".split(/\d+/)` → `["a","b","c"]`. Existing string split unchanged.
+
+### Rest Parameters in Arrow Functions (v0.5)
+
+`(...args) => expr` and `(first, ...rest) => expr`. Must be last parameter. AST: `ArrowFunction` gains `restParam: string | null`.
+
+---
+
+## Future (v0.6+)
 
 Features explicitly deferred from v0.4:
 
