@@ -1,0 +1,254 @@
+suite: collections_v5
+version: "0.5.0"
+tests:
+  # ─── sortBy ────────────────────────────────────────────────────────────────
+  - name: sortBy strings ascending
+    expression: '["banana","apple","cherry"].sortBy(x => x)'
+    expected: ["apple", "banana", "cherry"]
+    tags: ["level-3", "advanced"]
+
+  - name: sortBy numbers ascending
+    expression: "[3,1,4,1,5].sortBy(x => x)"
+    expected: [1, 1, 3, 4, 5]
+    tags: ["level-3", "advanced"]
+
+  - name: sortBy objects by field
+    expression: "items.sortBy(x => x.n)"
+    context:
+      items:
+        - {n: 3}
+        - {n: 1}
+        - {n: 2}
+    expected:
+      - {n: 1}
+      - {n: 2}
+      - {n: 3}
+    tags: ["level-3", "advanced"]
+
+  - name: sortBy empty array
+    expression: "[].sortBy(x => x)"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  # ─── take ──────────────────────────────────────────────────────────────────
+  - name: take three from five
+    expression: "[1,2,3,4,5].take(3)"
+    expected: [1, 2, 3]
+    tags: ["level-3", "advanced"]
+
+  - name: take beyond length returns full array
+    expression: "[1,2].take(5)"
+    expected: [1, 2]
+    tags: ["level-3", "advanced"]
+
+  - name: take zero returns empty
+    expression: "[1,2,3].take(0)"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  - name: take from empty array
+    expression: "[].take(3)"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  # ─── drop ──────────────────────────────────────────────────────────────────
+  - name: drop two from five
+    expression: "[1,2,3,4,5].drop(2)"
+    expected: [3, 4, 5]
+    tags: ["level-3", "advanced"]
+
+  - name: drop beyond length returns empty
+    expression: "[1,2].drop(5)"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  - name: drop zero returns full array
+    expression: "[1,2,3].drop(0)"
+    expected: [1, 2, 3]
+    tags: ["level-3", "advanced"]
+
+  # ─── count ─────────────────────────────────────────────────────────────────
+  - name: count elements greater than three
+    expression: "[1,2,3,4,5].count(x => x > 3)"
+    expected: 2
+    tags: ["level-3", "advanced"]
+
+  - name: count on empty array
+    expression: "[].count(x => true)"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  - name: count all false predicate
+    expression: "[1,2,3].count(x => x > 10)"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  # ─── sum ───────────────────────────────────────────────────────────────────
+  - name: sum basic numbers
+    expression: "[1,2,3].sum()"
+    expected: 6
+    tags: ["level-3", "advanced"]
+
+  - name: sum empty array is zero
+    expression: "[].sum()"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  - name: sum with non-numeric error
+    expression: '[1,"a"].sum()'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  # ─── avg ───────────────────────────────────────────────────────────────────
+  - name: avg basic numbers
+    expression: "[2,4,6].avg()"
+    expected: 4
+    tags: ["level-3", "advanced"]
+
+  - name: avg empty array error
+    expression: "[].avg()"
+    error: "empty"
+    tags: ["level-3", "advanced"]
+
+  - name: avg with non-numeric error
+    expression: '[1,"a"].avg()'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  # ─── compact ───────────────────────────────────────────────────────────────
+  - name: compact removes nulls only
+    expression: "[1,null,2,null,3].compact()"
+    expected: [1, 2, 3]
+    tags: ["level-3", "advanced"]
+
+  - name: compact keeps falsy non-null values
+    expression: '[false,0,"",null].compact()'
+    expected: [false, 0, ""]
+    tags: ["level-3", "advanced"]
+
+  - name: compact empty array
+    expression: "[].compact()"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  # ─── partition ─────────────────────────────────────────────────────────────
+  - name: partition by greater than three
+    expression: "[1,2,3,4,5].partition(x => x > 3)"
+    expected: [[4, 5], [1, 2, 3]]
+    tags: ["level-3", "advanced"]
+
+  - name: partition empty array
+    expression: "[].partition(x => true)"
+    expected: [[], []]
+    tags: ["level-3", "advanced"]
+
+  - name: partition all match
+    expression: "[4,5,6].partition(x => x > 3)"
+    expected: [[4, 5, 6], []]
+    tags: ["level-3", "advanced"]
+
+  # ─── keyBy ─────────────────────────────────────────────────────────────────
+  - name: keyBy by id field
+    expression: "items.keyBy(x => x.id)"
+    context:
+      items:
+        - {id: "a", val: 1}
+        - {id: "b", val: 2}
+    expected:
+      a: {id: "a", val: 1}
+      b: {id: "b", val: 2}
+    tags: ["level-3", "advanced"]
+
+  - name: keyBy duplicate key last wins
+    expression: '[{"k":"a","v":1},{"k":"a","v":2}].keyBy(x => x.k)'
+    expected:
+      a: {k: "a", v: 2}
+    tags: ["level-3", "advanced"]
+
+  - name: keyBy empty array
+    expression: "[].keyBy(x => x)"
+    expected: {}
+    tags: ["level-3", "advanced"]
+
+  # ─── min / max ─────────────────────────────────────────────────────────────
+  - name: min basic
+    expression: "[3,1,2].min()"
+    expected: 1
+    tags: ["level-3", "advanced"]
+
+  - name: max basic
+    expression: "[3,1,2].max()"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: min empty array error
+    expression: "[].min()"
+    error: "empty"
+    tags: ["level-3", "advanced"]
+
+  - name: max empty array error
+    expression: "[].max()"
+    error: "empty"
+    tags: ["level-3", "advanced"]
+
+  - name: min non-numeric error
+    expression: '["a"].min()'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  # ─── first / last ──────────────────────────────────────────────────────────
+  - name: first basic
+    expression: "[1,2,3].first()"
+    expected: 1
+    tags: ["level-3", "advanced"]
+
+  - name: last basic
+    expression: "[1,2,3].last()"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: first empty array returns null
+    expression: "[].first()"
+    expected: null
+    tags: ["level-3", "advanced"]
+
+  - name: last empty array returns null
+    expression: "[].last()"
+    expected: null
+    tags: ["level-3", "advanced"]
+
+  - name: first single element
+    expression: "[42].first()"
+    expected: 42
+    tags: ["level-3", "advanced"]
+
+  - name: last single element
+    expression: "[42].last()"
+    expected: 42
+    tags: ["level-3", "advanced"]
+
+  # ─── additional edge cases ─────────────────────────────────────────────────
+  - name: sortBy single element
+    expression: "[5].sortBy(x => x)"
+    expected: [5]
+    tags: ["level-3", "advanced"]
+
+  - name: count all match predicate
+    expression: "[1,2,3].count(x => x > 0)"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: max non-numeric error
+    expression: '["a"].max()'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  - name: drop one from three
+    expression: "[1,2,3].drop(1)"
+    expected: [2, 3]
+    tags: ["level-3", "advanced"]
+
+  - name: partition none match
+    expression: "[1,2,3].partition(x => x > 10)"
+    expected: [[], [1, 2, 3]]
+    tags: ["level-3", "advanced"]

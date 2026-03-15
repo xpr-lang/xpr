@@ -1,0 +1,110 @@
+suite: features_v5
+version: "0.5.0"
+tests:
+  # ─── fromEntries ───────────────────────────────────────────────────────────
+  - name: fromEntries basic pairs
+    expression: 'fromEntries([["a",1],["b",2]])'
+    expected:
+      a: 1
+      b: 2
+    tags: ["level-3", "advanced"]
+
+  - name: fromEntries empty array
+    expression: "fromEntries([])"
+    expected: {}
+    tags: ["level-3", "advanced"]
+
+  - name: fromEntries duplicate key last wins
+    expression: 'fromEntries([["a",1],["a",2]])'
+    expected:
+      a: 2
+    tags: ["level-3", "advanced"]
+
+  - name: fromEntries non-string key coerced to string
+    expression: 'fromEntries([[1,"x"]])'
+    expected:
+      "1": "x"
+    tags: ["level-3", "advanced"]
+
+  - name: fromEntries non-array argument error
+    expression: "fromEntries(42)"
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  - name: fromEntries bad element not a pair error
+    expression: "fromEntries([1,2])"
+    error: "pair"
+    tags: ["level-3", "advanced"]
+
+  # ─── split with regex ──────────────────────────────────────────────────────
+  - name: split by digit pattern
+    expression: '"a1b2c3".split(/\d+/)'
+    expected: ["a", "b", "c", ""]
+    tags: ["level-3", "advanced"]
+
+  - name: split by letter pattern
+    expression: '"hello".split(/l/)'
+    expected: ["he", "", "o"]
+    tags: ["level-3", "advanced"]
+
+  # ─── rest parameters ───────────────────────────────────────────────────────
+  - name: rest params all args captured
+    expression: "((...args) => args.length)(1,2,3)"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: rest params named plus rest
+    expression: "((first, ...rest) => rest)(1,2,3)"
+    expected: [2, 3]
+    tags: ["level-3", "advanced"]
+
+  - name: rest params empty call
+    expression: "((...args) => args)()"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  - name: rest params missing rest is empty
+    expression: "((a, b, ...rest) => rest)(1)"
+    expected: []
+    tags: ["level-3", "advanced"]
+
+  - name: rest params in map wraps each element
+    expression: "[1,2,3].map((...args) => args)"
+    expected: [[1], [2], [3]]
+    tags: ["level-3", "advanced"]
+
+  # ─── rest params regression ────────────────────────────────────────────────
+  - name: rest params regression single arg lambda
+    expression: "(x => x * 2)(5)"
+    expected: 10
+    tags: ["level-3", "advanced"]
+
+  - name: rest params regression two arg lambda
+    expression: "((x, y) => x + y)(1, 2)"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: rest params regression destructure object
+    expression: '(({name}) => name)({"name":"Alice"})'
+    expected: "Alice"
+    tags: ["level-3", "advanced"]
+
+  - name: rest params single rest all args
+    expression: "((...args) => args)(10,20,30)"
+    expected: [10, 20, 30]
+    tags: ["level-3", "advanced"]
+
+  - name: rest params two named one rest
+    expression: "((a, b, ...rest) => rest)(1,2,3,4)"
+    expected: [3, 4]
+    tags: ["level-3", "advanced"]
+
+  - name: rest params length with named and rest
+    expression: "((a, ...rest) => rest.length)(1,2,3,4)"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: rest params sum via reduce
+    expression: "((...args) => args.reduce((acc, x) => acc + x, 0))(1,2,3,4)"
+    expected: 10
+    tags: ["level-3", "advanced"]

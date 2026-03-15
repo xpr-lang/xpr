@@ -1,0 +1,159 @@
+suite: math_v5
+version: "0.5.0"
+tests:
+  # ─── sqrt ──────────────────────────────────────────────────────────────────
+  - name: sqrt of perfect square
+    expression: "sqrt(9)"
+    expected: 3
+    tags: ["level-3", "advanced"]
+
+  - name: sqrt of zero
+    expression: "sqrt(0)"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  - name: sqrt of two irrational
+    expression: "sqrt(2)"
+    expected: 1.4142135623730951
+    tags: ["level-3", "advanced"]
+
+  - name: sqrt of negative error
+    expression: "sqrt(-1)"
+    error: "negative"
+    tags: ["level-3", "advanced"]
+
+  - name: sqrt of string type error
+    expression: 'sqrt("x")'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  # ─── log ───────────────────────────────────────────────────────────────────
+  - name: log of one is zero
+    expression: "log(1)"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  - name: log of zero error
+    expression: "log(0)"
+    error: "domain"
+    tags: ["level-3", "advanced"]
+
+  - name: log of negative error
+    expression: "log(-1)"
+    error: "domain"
+    tags: ["level-3", "advanced"]
+
+  - name: log of string type error
+    expression: 'log("x")'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  - name: log of E is approximately one lower bound
+    expression: "log(E) > 0.999"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: log of E is approximately one upper bound
+    expression: "log(E) < 1.001"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  # ─── pow ───────────────────────────────────────────────────────────────────
+  - name: pow two to ten
+    expression: "pow(2, 10)"
+    expected: 1024
+    tags: ["level-3", "advanced"]
+
+  - name: pow two to zero
+    expression: "pow(2, 0)"
+    expected: 1
+    tags: ["level-3", "advanced"]
+
+  - name: pow two to negative one
+    expression: "pow(2, -1)"
+    expected: 0.5
+    tags: ["level-3", "advanced"]
+
+  - name: pow three squared
+    expression: "pow(3, 2)"
+    expected: 9
+    tags: ["level-3", "advanced"]
+
+  # ─── random ────────────────────────────────────────────────────────────────
+  - name: random returns number type
+    expression: 'type(random()) == "number"'
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: random is at least zero
+    expression: "random() >= 0"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: random is less than one
+    expression: "random() < 1"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  # ─── sign ──────────────────────────────────────────────────────────────────
+  - name: sign of negative number
+    expression: "sign(-5)"
+    expected: -1
+    tags: ["level-3", "advanced"]
+
+  - name: sign of zero
+    expression: "sign(0)"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  - name: sign of positive number
+    expression: "sign(42)"
+    expected: 1
+    tags: ["level-3", "advanced"]
+
+  - name: sign of string type error
+    expression: 'sign("x")'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  # ─── trunc ─────────────────────────────────────────────────────────────────
+  - name: trunc positive float
+    expression: "trunc(4.7)"
+    expected: 4
+    tags: ["level-3", "advanced"]
+
+  - name: trunc negative float
+    expression: "trunc(-4.7)"
+    expected: -4
+    tags: ["level-3", "advanced"]
+
+  - name: trunc zero
+    expression: "trunc(0)"
+    expected: 0
+    tags: ["level-3", "advanced"]
+
+  - name: trunc of string type error
+    expression: 'trunc("x")'
+    error: "type"
+    tags: ["level-3", "advanced"]
+
+  # ─── PI / E constants ──────────────────────────────────────────────────────
+  - name: PI constant value
+    expression: "PI"
+    expected: 3.141592653589793
+    tags: ["level-3", "advanced"]
+
+  - name: E constant value
+    expression: "E"
+    expected: 2.718281828459045
+    tags: ["level-3", "advanced"]
+
+  - name: PI is greater than three
+    expression: "PI > 3"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: E is greater than two
+    expression: "E > 2"
+    expected: true
+    tags: ["level-3", "advanced"]
