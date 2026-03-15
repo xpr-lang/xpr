@@ -230,7 +230,7 @@ XPR uses `null` exclusively. There is no `undefined` type.
 
 ### No `date` in v0.1
 
-Date/time operations are deferred to v0.2 due to timezone and format complexity. See [Future](#future-v02).
+Date/time operations were added in v0.3. See [Date/Time Functions](#datetime-functions-v03).
 
 ### Number Representation
 
@@ -1144,7 +1144,7 @@ Everything in Level 2, plus:
 └────────────┬───────────────┘
              │ produces
 ┌────────────▼───────────────┐
-│  Language-idiomatic AST    │  <- 17 node types, internal to each runtime
+│  Language-idiomatic AST    │  <- 27 node types, internal to each runtime
 └────────────┬───────────────┘
              │ walks
 ┌────────────▼───────────────┐
@@ -1153,7 +1153,7 @@ Everything in Level 2, plus:
              │ verified by
 ┌────────────▼───────────────┐
 │  Conformance Test Suite    │  <- expression + context -> expected result
-│  (YAML, 120+ cases)        │
+│  (YAML, 600+ cases)        │
 └────────────────────────────┘
 ```
 
@@ -1333,9 +1333,9 @@ Regex literals provide a first-class `regex` type. They coexist with the functio
 |---|---|---|
 | 1 | Grammar spec (EBNF) — this document | ✓ |
 | 2 | Conformance test suite (YAML, 250+ cases) | ✓ |
-| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.4.0 | ✓ |
-| 4 | Python runtime v0.4.0 | ✓ |
-| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.4.0 | ✓ |
+| 3 | JavaScript runtime (`@xpr-lang/xpr` on npm) v0.5.0 | ✓ |
+| 4 | Python runtime v0.5.0 | ✓ |
+| 5 | Go runtime (`github.com/xpr-lang/xpr-go`) v0.5.0 | ✓ |
 | 6 | Playground (web, CodeMirror 6) | ✓ |
 
 ---
@@ -1385,7 +1385,7 @@ Key rules: `compact()` removes `null` only (not `false`/`0`/`""`). `[].first()` 
 
 ## Future (v0.6+)
 
-Features explicitly deferred from v0.4:
+Features explicitly deferred from v0.5:
 
 | Feature | Reason for Deferral |
 |---------|---------------------|
@@ -1395,4 +1395,3 @@ Features explicitly deferred from v0.4:
 | **Type annotations** | Requires type system |
 | **Timezone-aware dates** | IANA timezone database, DST handling — enormous complexity. UTC-only date functions are supported in v0.3. |
 | **Regex literals with `g` flag** | All replace/match operations are already implicitly global/first-match. |
-| **`str.split(/regex/)`** | Deferred — use `str.split(str)` for now. |
