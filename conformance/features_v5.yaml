@@ -28,7 +28,7 @@ tests:
 
   - name: fromEntries non-array argument error
     expression: "fromEntries(42)"
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   - name: fromEntries bad element not a pair error

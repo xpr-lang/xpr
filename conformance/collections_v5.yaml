@@ -96,7 +96,7 @@ tests:
 
   - name: sum with non-numeric error
     expression: '[1,"a"].sum()'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   # ─── avg ───────────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ tests:
 
   - name: avg with non-numeric error
     expression: '[1,"a"].avg()'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   # ─── compact ───────────────────────────────────────────────────────────────
@@ -193,7 +193,7 @@ tests:
 
   - name: min non-numeric error
     expression: '["a"].min()'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   # ─── first / last ──────────────────────────────────────────────────────────
@@ -240,7 +240,7 @@ tests:
 
   - name: max non-numeric error
     expression: '["a"].max()'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   - name: drop one from three

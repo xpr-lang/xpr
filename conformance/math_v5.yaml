@@ -24,7 +24,7 @@ tests:
 
   - name: sqrt of string type error
     expression: 'sqrt("x")'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   # ─── log ───────────────────────────────────────────────────────────────────
@@ -35,17 +35,17 @@ tests:
 
   - name: log of zero error
     expression: "log(0)"
-    error: "domain"
+    error: "non-positive"
     tags: ["level-3", "advanced"]
 
   - name: log of negative error
     expression: "log(-1)"
-    error: "domain"
+    error: "non-positive"
     tags: ["level-3", "advanced"]
 
   - name: log of string type error
     expression: 'log("x")'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   - name: log of E is approximately one lower bound
@@ -113,7 +113,7 @@ tests:
 
   - name: sign of string type error
     expression: 'sign("x")'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   # ─── trunc ─────────────────────────────────────────────────────────────────
@@ -134,7 +134,7 @@ tests:
 
   - name: trunc of string type error
     expression: 'trunc("x")'
-    error: "type"
+    error: "Type error"
     tags: ["level-3", "advanced"]
 
   # ─── PI / E constants ──────────────────────────────────────────────────────
