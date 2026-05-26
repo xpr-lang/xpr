@@ -1,0 +1,291 @@
+suite: destructuring
+version: "0.4.0"
+tests:
+
+  # ── Object destructuring — basic ──────────────────────────────────────────
+
+  - name: object destructuring basic
+    expression: "let {name} = user; name"
+    context: {user: {name: "Alice", age: 30}}
+    expected: "Alice"
+    tags: ["destructuring", "object"]
+
+  - name: object destructuring multiple properties
+    expression: "let {name, age} = user; name + \" \" + string(age)"
+    context: {user: {name: "Alice", age: 30}}
+    expected: "Alice 30"
+    tags: ["destructuring", "object"]
+
+  - name: object destructuring rename
+    expression: "let {name: n, age: a} = user; n"
+    context: {user: {name: "Alice", age: 30}}
+    expected: "Alice"
+    tags: ["destructuring", "object"]
+
+  - name: object destructuring rename multiple
+    expression: "let {name: n, age: a} = user; a"
+    context: {user: {name: "Alice", age: 30}}
+    expected: 30
+    tags: ["destructuring", "object"]
+
+  - name: object destructuring missing property returns null
+    expression: "let {missing} = user; missing"
+    context: {user: {name: "Alice"}}
+    expected: null
+    tags: ["destructuring", "object"]
+
+  - name: object destructuring empty pattern
+    expression: "let {} = obj; 42"
+    context: {obj: {a: 1}}
+    expected: 42
+    tags: ["destructuring", "object"]
+
+  - name: object destructuring from array returns null
+    expression: "let {name} = arr; name"
+    context: {arr: [1, 2, 3]}
+    expected: null
+    tags: ["destructuring", "object"]
+
+  # ── Object destructuring — defaults ───────────────────────────────────────
+
+  - name: object destructuring default value used when null
+    expression: "let {name = \"Anonymous\"} = obj; name"
+    context: {obj: {}}
+    expected: "Anonymous"
+    tags: ["destructuring", "object", "defaults"]
+
+  - name: object destructuring default value not used when present
+    expression: "let {name = \"Anonymous\"} = obj; name"
+    context: {obj: {name: "Alice"}}
+    expected: "Alice"
+    tags: ["destructuring", "object", "defaults"]
+
+  - name: object destructuring default value expression
+    expression: "let {x = 1 + 2} = obj; x"
+    context: {obj: {}}
+    expected: 3
+    tags: ["destructuring", "object", "defaults"]
+
+  - name: object destructuring rename with default
+    expression: "let {name: n = \"Bob\"} = obj; n"
+    context: {obj: {}}
+    expected: "Bob"
+    tags: ["destructuring", "object", "defaults"]
+
+  - name: object destructuring rename with default not used
+    expression: "let {name: n = \"Bob\"} = obj; n"
+    context: {obj: {name: "Alice"}}
+    expected: "Alice"
+    tags: ["destructuring", "object", "defaults"]
+
+  # ── Object destructuring — rest ────────────────────────────────────────────
+
+  - name: object destructuring rest collects remaining
+    expression: "let {a, ...rest} = obj; rest"
+    context: {obj: {a: 1, b: 2, c: 3}}
+    expected: {b: 2, c: 3}
+    tags: ["destructuring", "object", "rest"]
+
+  - name: object destructuring rest empty when no remaining
+    expression: "let {a, ...rest} = obj; rest"
+    context: {obj: {a: 1}}
+    expected: {}
+    tags: ["destructuring", "object", "rest"]
+
+  - name: object destructuring rest with rename
+    expression: "let {a: x, ...rest} = obj; x"
+    context: {obj: {a: 1, b: 2}}
+    expected: 1
+    tags: ["destructuring", "object", "rest"]
+
+  # ── Object destructuring — nested ─────────────────────────────────────────
+
+  - name: object destructuring nested
+    expression: "let {address: {city}} = user; city"
+    context: {user: {name: "Alice", address: {city: "NYC", zip: "10001"}}}
+    expected: "NYC"
+    tags: ["destructuring", "object", "nested"]
+
+  - name: object destructuring nested multiple levels
+    expression: "let {a: {b: {c}}} = obj; c"
+    context: {obj: {a: {b: {c: 42}}}}
+    expected: 42
+    tags: ["destructuring", "object", "nested"]
+
+  - name: object destructuring nested with default
+    expression: "let {address: {city = \"Unknown\"}} = user; city"
+    context: {user: {address: {}}}
+    expected: "Unknown"
+    tags: ["destructuring", "object", "nested", "defaults"]
+
+  # ── Array destructuring — basic ────────────────────────────────────────────
+
+  - name: array destructuring basic
+    expression: "let [first] = arr; first"
+    context: {arr: [1, 2, 3]}
+    expected: 1
+    tags: ["destructuring", "array"]
+
+  - name: array destructuring multiple elements
+    expression: "let [a, b, c] = arr; b"
+    context: {arr: [10, 20, 30]}
+    expected: 20
+    tags: ["destructuring", "array"]
+
+  - name: array destructuring out of bounds returns null
+    expression: "let [a, b, c] = arr; c"
+    context: {arr: [1, 2]}
+    expected: null
+    tags: ["destructuring", "array"]
+
+  - name: array destructuring empty pattern
+    expression: "let [] = arr; 99"
+    context: {arr: [1, 2, 3]}
+    expected: 99
+    tags: ["destructuring", "array"]
+
+  - name: array destructuring single element
+    expression: "let [x] = arr; x"
+    context: {arr: [42]}
+    expected: 42
+    tags: ["destructuring", "array"]
+
+  # ── Array destructuring — defaults ────────────────────────────────────────
+
+  - name: array destructuring default value used when null
+    expression: "let [a = 0, b = 0] = arr; b"
+    context: {arr: [1]}
+    expected: 0
+    tags: ["destructuring", "array", "defaults"]
+
+  - name: array destructuring default value not used when present
+    expression: "let [a = 0, b = 0] = arr; a"
+    context: {arr: [5, 10]}
+    expected: 5
+    tags: ["destructuring", "array", "defaults"]
+
+  - name: array destructuring default expression
+    expression: "let [a = 2 * 3] = arr; a"
+    context: {arr: []}
+    expected: 6
+    tags: ["destructuring", "array", "defaults"]
+
+  # ── Array destructuring — rest ─────────────────────────────────────────────
+
+  - name: array destructuring rest collects remaining
+    expression: "let [head, ...tail] = arr; tail"
+    context: {arr: [1, 2, 3, 4]}
+    expected: [2, 3, 4]
+    tags: ["destructuring", "array", "rest"]
+
+  - name: array destructuring rest empty when no remaining
+    expression: "let [a, ...rest] = arr; rest"
+    context: {arr: [1]}
+    expected: []
+    tags: ["destructuring", "array", "rest"]
+
+  - name: array destructuring rest from empty array
+    expression: "let [a, ...rest] = arr; a"
+    context: {arr: []}
+    expected: null
+    tags: ["destructuring", "array", "rest"]
+
+  - name: array destructuring rest from empty array rest is empty
+    expression: "let [a, ...rest] = arr; rest"
+    context: {arr: []}
+    expected: []
+    tags: ["destructuring", "array", "rest"]
+
+  # ── Array destructuring — nested ───────────────────────────────────────────
+
+  - name: array destructuring nested
+    expression: "let [[a, b], [c, d]] = matrix; c"
+    context: {matrix: [[1, 2], [3, 4]]}
+    expected: 3
+    tags: ["destructuring", "array", "nested"]
+
+  - name: array destructuring nested object
+    expression: "let [{name}, {name: n2}] = users; n2"
+    context: {users: [{name: "Alice"}, {name: "Bob"}]}
+    expected: "Bob"
+    tags: ["destructuring", "array", "nested"]
+
+  # ── Arrow function params — destructuring ──────────────────────────────────
+
+  - name: arrow function with object destructuring param
+    expression: "let f = ({name}) => name; f({name: \"Alice\", age: 30})"
+    expected: "Alice"
+    tags: ["destructuring", "arrow"]
+
+  - name: arrow function with array destructuring param
+    expression: "let f = ([a, b]) => a + b; f([3, 4])"
+    expected: 7
+    tags: ["destructuring", "arrow"]
+
+  - name: arrow function destructuring in map
+    expression: "users.map(({name}) => name)"
+    context: {users: [{name: "Alice"}, {name: "Bob"}, {name: "Carol"}]}
+    expected: ["Alice", "Bob", "Carol"]
+    tags: ["destructuring", "arrow", "collections"]
+
+  - name: arrow function destructuring in filter
+    expression: "users.filter(({age}) => age >= 18).map(({name}) => name)"
+    context: {users: [{name: "Alice", age: 30}, {name: "Bob", age: 15}, {name: "Carol", age: 25}]}
+    expected: ["Alice", "Carol"]
+    tags: ["destructuring", "arrow", "collections"]
+
+  - name: arrow function destructuring with default
+    expression: "let f = ({name = \"Unknown\"}) => name; f({})"
+    expected: "Unknown"
+    tags: ["destructuring", "arrow", "defaults"]
+
+  - name: arrow function mixed params
+    expression: "let f = (x, {name}) => x + name; f(\"Hello \", {name: \"World\"})"
+    expected: "Hello World"
+    tags: ["destructuring", "arrow"]
+
+  - name: arrow function array destructuring in reduce
+    expression: "pairs.reduce((acc, [k, v]) => acc + k + \"=\" + string(v) + \";\", \"\")"
+    context: {pairs: [["a", 1], ["b", 2], ["c", 3]]}
+    expected: "a=1;b=2;c=3;"
+    tags: ["destructuring", "arrow", "collections"]
+
+  # ── Combined let + arrow ───────────────────────────────────────────────────
+
+  - name: chained let with destructuring
+    expression: "let {a, b} = obj; let sum = a + b; sum"
+    context: {obj: {a: 10, b: 20}}
+    expected: 30
+    tags: ["destructuring", "object"]
+
+  - name: destructuring in pipe
+    expression: "obj |> (({x, y}) => x + y)"
+    context: {obj: {x: 3, y: 4}}
+    expected: 7
+    tags: ["destructuring", "pipe"]
+
+  # ── Error cases ────────────────────────────────────────────────────────────
+
+  - name: destructuring null throws error
+    expression: "let {name} = val; name"
+    context: {val: null}
+    error: "destructure null"
+    tags: ["destructuring", "error"]
+
+  - name: array destructuring non-array throws error
+    expression: "let [a] = obj; a"
+    context: {obj: {a: 1}}
+    error: "destructure"
+    tags: ["destructuring", "array", "error"]
+
+  - name: array destructuring string throws error
+    expression: "let [a] = str; a"
+    context: {str: "hello"}
+    error: "destructure"
+    tags: ["destructuring", "array", "error"]
+
+  - name: duplicate binding throws error
+    expression: "let {a, a} = obj; a"
+    context: {obj: {a: 1}}
+    error: "duplicate"
+    tags: ["destructuring", "error"]

@@ -1,0 +1,118 @@
+suite: type_predicates
+version: "0.5.0"
+tests:
+  # ─── isNumber ──────────────────────────────────────────────────────────────
+  - name: isNumber with integer
+    expression: "isNumber(42)"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: isNumber with string
+    expression: 'isNumber("42")'
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isNumber with null
+    expression: "isNumber(null)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isNumber with boolean
+    expression: "isNumber(true)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isNumber with array
+    expression: "isNumber([1,2])"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  # ─── isString ──────────────────────────────────────────────────────────────
+  - name: isString with string
+    expression: 'isString("hello")'
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: isString with number
+    expression: "isString(42)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isString with null
+    expression: "isString(null)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  # ─── isArray ───────────────────────────────────────────────────────────────
+  - name: isArray with array
+    expression: "isArray([1,2])"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: isArray with string
+    expression: 'isArray("hello")'
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isArray with object
+    expression: 'isArray({"a":1})'
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  # ─── isNull ────────────────────────────────────────────────────────────────
+  - name: isNull with null
+    expression: "isNull(null)"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: isNull with zero
+    expression: "isNull(0)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isNull with false
+    expression: "isNull(false)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isNull with empty string
+    expression: 'isNull("")'
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  # ─── isObject ──────────────────────────────────────────────────────────────
+  - name: isObject with object
+    expression: 'isObject({"a":1})'
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: isObject with array is false
+    expression: "isObject([1,2])"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isObject with null is false
+    expression: "isObject(null)"
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isObject with string is false
+    expression: 'isObject("x")'
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  # ─── isRegex ───────────────────────────────────────────────────────────────
+  - name: isRegex with regex literal
+    expression: "isRegex(/test/)"
+    expected: true
+    tags: ["level-3", "advanced"]
+
+  - name: isRegex with string
+    expression: 'isRegex("test")'
+    expected: false
+    tags: ["level-3", "advanced"]
+
+  - name: isRegex with null
+    expression: "isRegex(null)"
+    expected: false
+    tags: ["level-3", "advanced"]
